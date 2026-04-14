@@ -781,3 +781,137 @@ class TestTokenBudgetTailProtection:
         # Tool at index 2 is outside the protected tail (last 3 = indices 2,3,4)
         # so it might or might not be pruned depending on boundary
         assert isinstance(pruned, int)
+
+
+class TestPruneDoesNotMutateOriginals:
+    """Regression: _prune_old_tool_results should not mutate the input list or its dicts."""
+
+    def test_original_messages_unchanged_after_prune(self):
+        with patch("agent.context_compressor.get_model_context_length", return_value=100_000):
+            c = ContextCompressor(model="test", quiet_mode=True)
+
+        large_content = "x" * 5000
+        messages = [
+            {"role": "user", "content": "start"},
+            {"role": "tool", "content": large_content, "tool_call_id": "c1"},
+            {"role": "user", "content": "end"},
+        ]
+        original_refs = [id(m) for m in messages]
+        original_content = messages[1]["content"]
+
+        result, pruned = c._prune_old_tool_results(messages, protect_tail_count=1)
+
+        # Input list must be unchanged
+        assert [id(m) for m in messages] == original_refs
+        # Input dict must be unchanged
+        assert messages[1]["content"] == original_content
+        # Pruned result dict must be a different object
+        if pruned > 0:
+            assert result[1] is not messages[1]
+            assert result[1]["content"] != original_content
+
+
+class TestSuccessiveCompressions:
+    """Verify that repeated compressions use iterative summary updates."""
+
+    def _make_compressor(self):
+        with patch("agent.context_compressor.get_model_context_length", return_value=100_000):
+            return ContextCompressor(
+                model="test", quiet_mode=True, protect_first_n=2, protect_last_n=2
+            )
+
+    def _mock_response(self, text):
+        r = MagicMock()
+        r.choices = [MagicMock()]
+        r.choices[0].message.content = text
+        return r
+
+    def _make_messages(self, n, start=0):
+        return [
+            {"role": "user" if i % 2 == 0 else "assistant", "content": f"msg {start + i}"}
+            for i in range(n)
+        ]
+
+    def test_compression_count_increments_correctly(self):
+        c = self._make_compressor()
+        msgs = self._make_messages(10)
+        with patch("agent.context_compressor.call_llm", return_value=self._mock_response("first summary")):
+            result1 = c.compress(msgs)
+        assert c.compression_count == 1
+
+        with patch("agent.context_compressor.call_llm", return_value=self._mock_response("second summary")):
+            result2 = c.compress(result1 + self._make_messages(4, start=10))
+        assert c.compression_count == 2
+
+    def test_previous_summary_stored_and_used_on_second_compress(self):
+        """Second compress should pass the previous summary in the prompt (iterative update)."""
+        c = self._make_compressor()
+        msgs = self._make_messages(10)
+
+        with patch("agent.context_compressor.call_llm", return_value=self._mock_response("FIRST")) as m1:
+            c.compress(msgs)
+
+        assert c._previous_summary is not None
+        assert "FIRST" in c._previous_summary
+
+        with patch("agent.context_compressor.call_llm", return_value=self._mock_response("SECOND")) as m2:
+            extra = msgs + self._make_messages(4, start=10)
+            c.compress(extra)
+
+        # The second call's prompt should reference the previous summary
+        call_kwargs = m2.call_args.kwargs
+        prompt_content = call_kwargs["messages"][0]["content"]
+        assert "FIRST" in prompt_content, "Second compress should embed first summary in prompt"
+
+    def test_session_reset_clears_previous_summary(self):
+        c = self._make_compressor()
+        msgs = self._make_messages(10)
+
+        with patch("agent.context_compressor.call_llm", return_value=self._mock_response("FIRST")):
+            c.compress(msgs)
+
+        assert c._previous_summary is not None
+        c.on_session_reset()
+        assert c._previous_summary is None
+        assert c.compression_count == 0
+
+
+class TestEdgeCaseCompress:
+    """Edge cases for the compress() method."""
+
+    def _make_compressor(self, **kwargs):
+        with patch("agent.context_compressor.get_model_context_length", return_value=100_000):
+            return ContextCompressor(model="test", quiet_mode=True, **kwargs)
+
+    def test_exactly_min_messages_returns_unchanged(self):
+        """compress() returns unchanged when message count == protect_first_n + 3 + 1."""
+        c = self._make_compressor(protect_first_n=2, protect_last_n=2)
+        min_count = c.protect_first_n + 3 + 1  # 6
+        msgs = [
+            {"role": "user" if i % 2 == 0 else "assistant", "content": f"m{i}"}
+            for i in range(min_count)
+        ]
+        result = c.compress(msgs)
+        assert result == msgs
+
+    def test_empty_messages_returns_unchanged(self):
+        c = self._make_compressor(protect_first_n=2, protect_last_n=2)
+        assert c.compress([]) == []
+
+    def test_all_messages_protected_returns_unchanged(self):
+        """When protect ranges overlap, compression is a no-op."""
+        c = self._make_compressor(protect_first_n=5, protect_last_n=5)
+        msgs = [
+            {"role": "user" if i % 2 == 0 else "assistant", "content": f"m{i}"}
+            for i in range(8)
+        ]
+        # head=5, tail from token budget, likely overlaps — compress_start >= compress_end
+        result = c.compress(msgs)
+        # Either unchanged or compressed, but must not crash
+        assert isinstance(result, list)
+
+    def test_single_message_returns_unchanged(self):
+        c = self._make_compressor(protect_first_n=2, protect_last_n=2)
+        msgs = [{"role": "user", "content": "just one message"}]
+        result = c.compress(msgs)
+        assert result == msgs

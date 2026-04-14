@@ -29,6 +29,14 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
+# Pre-compiled regexes for sanitize_title — compiled once at module load
+# instead of on every call to avoid repeated regex compilation overhead.
+_RE_ASCII_CTRL = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
+_RE_UNICODE_CTRL = re.compile(
+    r'[\u200b-\u200f\u2028-\u202e\u2060-\u2069\ufeff\ufffc\ufff9-\ufffb]'
+)
+_RE_WHITESPACE = re.compile(r'\s+')
+
 DEFAULT_DB_PATH = get_hermes_home() / "state.db"
 
 SCHEMA_VERSION = 6
@@ -248,6 +256,13 @@ class SessionDB:
                     pass
                 self._conn.close()
                 self._conn = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False
 
     def _init_schema(self):
         """Create tables and FTS if they don't exist, run migrations."""
@@ -579,19 +594,16 @@ class SessionDB:
         # Remove ASCII control characters (0x00-0x1F, 0x7F) but keep
         # whitespace chars (\t=0x09, \n=0x0A, \r=0x0D) so they can be
         # normalized to spaces by the whitespace collapsing step below
-        cleaned = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', title)
+        cleaned = _RE_ASCII_CTRL.sub('', title)
 
         # Remove problematic Unicode control characters:
         # - Zero-width chars (U+200B-U+200F, U+FEFF)
         # - Directional overrides (U+202A-U+202E, U+2066-U+2069)
         # - Object replacement (U+FFFC), interlinear annotation (U+FFF9-U+FFFB)
-        cleaned = re.sub(
-            r'[\u200b-\u200f\u2028-\u202e\u2060-\u2069\ufeff\ufffc\ufff9-\ufffb]',
-            '', cleaned,
-        )
+        cleaned = _RE_UNICODE_CTRL.sub('', cleaned)
 
         # Collapse internal whitespace runs and strip
-        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        cleaned = _RE_WHITESPACE.sub(' ', cleaned).strip()
 
         if not cleaned:
             return None

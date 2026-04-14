@@ -200,7 +200,10 @@ class ContextCompressor(ContextEngine):
         if not messages:
             return messages, 0
 
-        result = [m.copy() for m in messages]
+        # Shallow copy of the list only — individual dicts are shared until
+        # we actually need to modify one (copy-on-write via {**msg, ...}).
+        # For a 1000-message history this avoids ~1000 unnecessary dict copies.
+        result = list(messages)
         pruned = 0
 
         # Determine the prune boundary

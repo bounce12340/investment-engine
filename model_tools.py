@@ -129,11 +129,16 @@ def _run_async(coro):
 # Tool Discovery  (importing each module triggers its registry.register calls)
 # =============================================================================
 
-def _discover_tools():
+def _discover_tools() -> List[str]:
     """Import all tool modules to trigger their registry.register() calls.
 
     Wrapped in a function so import errors in optional tools (e.g., fal_client
     not installed) don't prevent the rest from loading.
+
+    Returns:
+        List of module names that failed to import.  Empty list means all
+        tools loaded successfully.  Callers (e.g., health-check commands) can
+        inspect ``TOOL_DISCOVERY_FAILURES`` for a summary without re-importing.
     """
     _modules = [
         "tools.web_tools",
@@ -160,14 +165,24 @@ def _discover_tools():
         "tools.homeassistant_tool",
     ]
     import importlib
+    failed: List[str] = []
     for mod_name in _modules:
         try:
             importlib.import_module(mod_name)
         except Exception as e:
             logger.warning("Could not import tool module %s: %s", mod_name, e)
+            failed.append(mod_name)
+    if failed:
+        logger.warning(
+            "Tool discovery: %d/%d module(s) failed to load: %s",
+            len(failed), len(_modules), ", ".join(failed),
+        )
+    return failed
 
 
-_discover_tools()
+# Module-level record of tool modules that failed to import.
+# Inspectable by health-check commands without triggering a re-discovery.
+TOOL_DISCOVERY_FAILURES: List[str] = _discover_tools()
 
 # MCP tool discovery (external MCP servers from config)
 try:
