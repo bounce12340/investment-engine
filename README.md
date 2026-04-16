@@ -1,8 +1,15 @@
 # 🛡️ Investment-Engine: Institutional Quant-Mental Hybrid Platform
 
-An institutional-grade investment monitoring and valuation framework designed to combine quantitative risk sensing with qualitative fundamental analysis. 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
+
+An institutional-grade investment monitoring and valuation framework designed to combine quantitative risk sensing with qualitative fundamental analysis.
 
 Unlike traditional portfolios that rely on lagging indicators (price/earnings), **Investment-Engine** focuses on **Leading Indicators**, **Paradigm Shifts**, and **Probabilistic Valuation** to anticipate market moves before they are priced in.
+
+**[繁體中文](docs/README.zh-TW.md)** | **[日本語](docs/README.ja.md)** | **[한국어](docs/README.ko.md)**
+
+---
 
 ## 🚀 Core Architecture
 
@@ -25,25 +32,154 @@ The system avoids single-point price targets, instead using a triangulation of t
 - **Two-Stage DCF**: Projects intrinsic value based on growth decay.
 - **Relative Multiples**: Benchmarks against industry peers.
 
+---
+
 ## 🛠️ Key Features
 
-- **Strategic Leading Indicators**: Specialized tracking of high-impact metrics (e.g., CUDA Dominance, Cloud CapEx ROI).
-- **Margin Stress Testing**: Integration of leverage/margin data to monitor Maintenance Margin and Margin Call risks.
-- **Obsidian Integration**: Automated generation of structured weekly reports directly into a personal knowledge base.
-- **Quantitative Gradients**: Uses a Green $\to$ Yellow $\to$ Red gradient system instead of binary triggers to sense trend decay.
+| Feature | Description |
+|---------|-------------|
+| **Strategic Leading Indicators** | Specialized tracking of high-impact metrics (CUDA Dominance, Cloud CapEx ROI) |
+| **Margin Stress Testing** | Integration of leverage/margin data to monitor Maintenance Margin and Margin Call risks |
+| **Obsidian Integration** | Automated generation of structured weekly reports directly into a personal knowledge base |
+| **Quantitative Gradients** | Uses a Green → Yellow → Red gradient system instead of binary triggers to sense trend decay |
+| **Red-Blue Team Analysis** | Counteracts confirmation bias through adversarial thesis testing |
+| **Multi-Model Valuation** | Triangulates DCF, Probabilistic Scenarios, and Relative Multiples |
+
+---
 
 ## 📂 Project Structure
 
-- `investment_watcher.py`: The core orchestrator for weekly sensing and reporting.
-- `valuation_engine.py`: The mathematical core handling DCF, Probabilistic, and Relative models.
-- `data/monitor-registry.json`: The "Brain" containing all ticker-specific theses, metrics, and kill-switches.
-- `Weekly_Reports/`: Archive of AI-generated institutional memos.
-
-## 🎯 Target Strategy
-Optimized for high-conviction, high-growth portfolios focusing on:
-- **AI Infrastructure** (Compute, Networking, Software Moats)
-- **Strategic Resources** (Energy, Rare Earths)
-- **Disruptive Tech** (Robotics, FinTech, Space)
+```
+investment-engine/
+├── investment_watcher.py      # Core orchestrator for weekly sensing
+├── valuation_engine.py       # Mathematical core (DCF/Probabilistic/Relative)
+├── data/
+│   └── monitor-registry.json # The "Brain" - ticker theses & kill-switches
+├── Weekly_Reports/           # AI-generated institutional memos
+└── docs/
+    ├── README.zh-TW.md       # 繁體中文文檔
+    ├── README.ja.md          # 日本語ドキュメント
+    └── README.ko.md          # 한국어 문서
+```
 
 ---
+
+## 🎯 Target Strategy
+
+Optimized for high-conviction, high-growth portfolios focusing on:
+
+| Sector | Focus Areas |
+|--------|-------------|
+| **AI Infrastructure** | Compute, Networking, Software Moats |
+| **Strategic Resources** | Energy, Rare Earths |
+| **Disruptive Tech** | Robotics, FinTech, Space |
+
+---
+
+## 🚦 Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+- Node.js (for Obsidian integration)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/bounce12340/investment-engine.git
+cd investment-engine
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+### Quick Start
+
+```python
+from investment_watcher import InvestmentWatcher
+
+# Initialize the engine
+watcher = InvestmentWatcher(config_path="data/monitor-registry.json")
+
+# Run weekly sensing
+report = watcher.run_weekly_analysis()
+
+# Generate Obsidian report
+watcher.export_to_obsidian(vault_path="~/Documents/Vault")
+```
+
+---
+
+## 📊 Example Output
+
+### Weekly Report Structure
+
+```
+# NVDA Weekly Analysis - 2026-W15
+
+## 🟢 Status: Bullish (Score: 8.2/10)
+
+### Leading Indicators
+- CUDA Dominance: 92% (↑ +2%)
+- Data Center Revenue Growth: +217% YoY
+- Blackwell Adoption: 45% of new deployments
+
+### Red Team Alerts
+- ⚠️ China export restrictions impact: -$2B Q2 revenue
+- ⚠️ AMD MI300X competitive pressure in enterprise
+
+### Valuation Triangulation
+| Model | Price Target | Confidence |
+|-------|--------------|------------|
+| DCF (Two-Stage) | $1,150 | High |
+| Probabilistic | $1,080 | Medium |
+| Relative | $950 | Medium |
+
+### Kill-Switch Status
+| Trigger | Current | Threshold | Status |
+|---------|---------|-----------|--------|
+| CUDA Share < 80% | 92% | 80% | 🟢 Safe |
+| GM% < 60% | 75.5% | 60% | 🟢 Safe |
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run test suite
+pytest tests/
+
+# Run margin stress test
+python -m tests.stress_test --ticker NVDA
+```
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## 📚 Documentation
+
+- **English**: You are here
+- **[繁體中文](docs/README.zh-TW.md)** - Traditional Chinese
+- **[日本語](docs/README.ja.md)** - Japanese
+- **[한국어](docs/README.ko.md)** - Korean
+
+---
+
 *Developed for high-precision risk management and strategic alpha generation.*
