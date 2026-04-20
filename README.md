@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 
+**English** | **[繁體中文](docs/README.zh-TW.md)** | **[日本語](docs/README.ja.md)** | **[한국어](docs/README.ko.md)**
+
 A lightweight framework for tracking high-conviction equity theses with
 **triangulation valuation**, **kill-switch monitoring**, an **adversarial
 Red/Blue thesis stress test**, and **Obsidian-integrated weekly reports**.
