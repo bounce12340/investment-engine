@@ -18,6 +18,8 @@ def test_end_to_end_build_report_without_price():
     assert len(report.kill_switches) >= 1
     assert len(report.bull_points) >= 1
     assert len(report.bear_points) >= 1
+    assert 0.0 <= report.stress_test.conviction_score <= 10.0
+    assert len(report.stress_test.flags) >= 1
 
 
 def test_build_report_tolerates_price_fetch_failure(monkeypatch):

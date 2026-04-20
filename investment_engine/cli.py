@@ -76,6 +76,24 @@ def analyze(
     if fired:
         console.print(f"\n[bold red]⚠ {len(fired)} kill-switch(es) triggered.[/bold red]")
 
+    console.print()
+    st = report.stress_test
+    score_color = "green" if st.conviction_score >= 7 else "yellow" if st.conviction_score >= 4 else "red"
+    st_table = Table(title="Thesis Stress Test")
+    st_table.add_column("Metric")
+    st_table.add_column("Value", justify="right")
+    st_table.add_row("Conviction score", f"[bold {score_color}]{st.conviction_score:.1f} / 10[/bold {score_color}]")
+    st_table.add_row("Bull / Bear", f"{st.bull_count} / {st.bear_count}")
+    st_table.add_row("Kill-switches triggered", f"{st.kill_switches_triggered} / {st.kill_switches_total}")
+    if st.bull_bear_ratio is not None:
+        st_table.add_row("Bull/Bear ratio", f"{st.bull_bear_ratio:.2f}")
+    console.print(st_table)
+
+    for f in st.flags:
+        icon = {"alert": "[red]🔴", "warning": "[yellow]⚠️ ", "info": "[green]ℹ️ "}[f.severity]
+        close = "[/red]" if f.severity == "alert" else "[/yellow]" if f.severity == "warning" else "[/green]"
+        console.print(f"{icon} {f.message}{close}")
+
 
 @app.command()
 def weekly(

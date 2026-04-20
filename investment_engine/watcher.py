@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
+from investment_engine.analysis.red_blue_team import stress_test
 from investment_engine.data_sources.registry import load_ticker
 from investment_engine.data_sources.yfinance_source import get_current_price
 from investment_engine.models import TickerThesis, ValuationResult, WeeklyReport
@@ -60,4 +61,7 @@ class InvestmentWatcher:
             kill_switches=thesis.kill_switches,
             bull_points=thesis.bull_points,
             bear_points=thesis.bear_points,
+            stress_test=stress_test(
+                thesis.bull_points, thesis.bear_points, thesis.kill_switches
+            ),
         )

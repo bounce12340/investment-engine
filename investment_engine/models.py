@@ -90,6 +90,26 @@ class ValuationResult(BaseModel):
         return (self.dcf_target + self.probabilistic_target + self.relative_target) / 3
 
 
+class StressTestFlag(BaseModel):
+    severity: Literal["info", "warning", "alert"]
+    message: str
+
+
+class ThesisStressTest(BaseModel):
+    bull_count: int
+    bear_count: int
+    kill_switches_triggered: int
+    kill_switches_total: int
+    conviction_score: float
+    flags: list[StressTestFlag]
+
+    @property
+    def bull_bear_ratio(self) -> float | None:
+        if self.bear_count == 0:
+            return None
+        return self.bull_count / self.bear_count
+
+
 class WeeklyReport(BaseModel):
     ticker: str
     name: str
@@ -103,3 +123,4 @@ class WeeklyReport(BaseModel):
     kill_switches: list[KillSwitch]
     bull_points: list[str]
     bear_points: list[str]
+    stress_test: ThesisStressTest

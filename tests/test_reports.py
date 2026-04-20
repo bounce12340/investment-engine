@@ -1,6 +1,7 @@
 from datetime import date
 from pathlib import Path
 
+from investment_engine.analysis.red_blue_team import stress_test
 from investment_engine.models import (
     DCFInputs,
     KillSwitch,
@@ -17,6 +18,12 @@ from investment_engine.reports.obsidian import write_to_vault
 
 
 def _sample_report() -> WeeklyReport:
+    kill_switches = [
+        KillSwitch(name="cuda", metric="CUDA %", threshold=80, direction="below", current_value=92),
+        KillSwitch(name="gm", metric="GM %", threshold=60, direction="below", current_value=50),
+    ]
+    bull_points = ["Moat intact"]
+    bear_points = ["Concentration risk"]
     return WeeklyReport(
         ticker="NVDA",
         name="NVIDIA",
@@ -27,12 +34,10 @@ def _sample_report() -> WeeklyReport:
         valuation=ValuationResult(dcf_target=1150, probabilistic_target=1080, relative_target=950),
         thesis=ThesisNarrative(short_term="ST", medium_term="MT", long_term="LT"),
         leading_indicators=[LeadingIndicator(name="CUDA", value=92.0, unit="%", description="d")],
-        kill_switches=[
-            KillSwitch(name="cuda", metric="CUDA %", threshold=80, direction="below", current_value=92),
-            KillSwitch(name="gm", metric="GM %", threshold=60, direction="below", current_value=50),
-        ],
-        bull_points=["Moat intact"],
-        bear_points=["Concentration risk"],
+        kill_switches=kill_switches,
+        bull_points=bull_points,
+        bear_points=bear_points,
+        stress_test=stress_test(bull_points, bear_points, kill_switches),
     )
 
 
@@ -44,6 +49,8 @@ def test_render_weekly_contains_key_sections():
     assert "🔴 TRIGGERED" in md
     assert "Moat intact" in md
     assert "Concentration risk" in md
+    assert "Thesis Stress Test" in md
+    assert "Conviction score" in md
 
 
 def test_write_to_vault_creates_file(tmp_path: Path):
