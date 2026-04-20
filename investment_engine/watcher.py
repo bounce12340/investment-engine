@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
+from investment_engine.analysis.fundamentals import compute_fundamentals_check
 from investment_engine.analysis.performance import compute_performance_stats
 from investment_engine.analysis.red_blue_team import stress_test
 from investment_engine.analysis.technicals import MIN_HISTORY, compute_technical_snapshot
@@ -10,8 +11,10 @@ from investment_engine.data_sources.registry import load_ticker
 from investment_engine.data_sources.yfinance_source import (
     get_current_price,
     get_price_history,
+    get_ticker_info,
 )
 from investment_engine.models import (
+    FundamentalsCheck,
     PerformanceStats,
     TechnicalSnapshot,
     TickerThesis,
@@ -49,6 +52,7 @@ class InvestmentWatcher:
         fetch_price: bool = True,
         fetch_performance: bool = True,
         fetch_technicals: bool = True,
+        fetch_fundamentals: bool = True,
     ) -> WeeklyReport:
         thesis = self.load(ticker)
         valuation = self.valuate(thesis)
@@ -93,6 +97,20 @@ class InvestmentWatcher:
                 except Exception:
                     technicals = None
 
+        fundamentals: FundamentalsCheck | None = None
+        if fetch_fundamentals:
+            try:
+                info = get_ticker_info(ticker)
+            except Exception:
+                info = None
+            if info is not None:
+                try:
+                    fundamentals = compute_fundamentals_check(
+                        thesis, info, current_price=price
+                    )
+                except Exception:
+                    fundamentals = None
+
         return WeeklyReport(
             ticker=thesis.ticker,
             name=thesis.name,
@@ -111,4 +129,5 @@ class InvestmentWatcher:
             ),
             performance=performance,
             technicals=technicals,
+            fundamentals=fundamentals,
         )

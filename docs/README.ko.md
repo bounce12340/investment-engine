@@ -81,10 +81,16 @@ VOO 대비 Jensen α / β** (무위험 수익률 = 4.0%) 를 계산합니다.
 50일 및 200일 이동 평균, MA 괴리율** 을 계산합니다. RSI ≥ 70 / ≤ 30 은
 과매수 / 과매도로 자동 태그됩니다. 순수 pandas 구현 — 새 의존성 없음.
 
-**8. 실시간 주가.** `yfinance` 를 통해 Yahoo Finance 에서 현재 가격을
+**8. 펀더멘털 대조.** 각 티커에 대해 yfinance 에서
+**trailing/forward P/E, 시가총액, live β, 애널리스트 컨센서스 목표가, 의견,
+배당수익률** 을 실시간으로 가져옵니다. 또한 registry 의 DCF 가정
+(FCF, 발행 주식수) 을 live 값과 대조하여, FCF 편차가 25% 를 넘거나
+주식수 편차가 5% 를 넘으면 경고 플래그를 띄워 등록값 노후화를 드러냅니다.
+
+**9. 실시간 주가.** `yfinance` 를 통해 Yahoo Finance 에서 현재 가격을
 가져오며, 오프라인 시에는 우아하게 폴백합니다.
 
-**9. 스케줄링.** macOS `launchd` 로 일간 / 주간 / 월간 반복 실행.
+**10. 스케줄링.** macOS `launchd` 로 일간 / 주간 / 월간 반복 실행.
 대화형 프롬프트 또는 플래그로 설정.
 
 ---
@@ -121,7 +127,7 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 ## CLI 레퍼런스
 
 ### `analyze TICKER`
-콘솔 요약 출력: 삼각 밸류에이션, kill-switch 상태, 역사적 성과, 테크니컬 스냅샷, 테제 스트레스 테스트.
+콘솔 요약 출력: 삼각 밸류에이션, kill-switch 상태, 역사적 성과, 테크니컬 스냅샷, 펀더멘털 대조, 테제 스트레스 테스트.
 
 | 플래그 | 기본값 | 설명 |
 |--------|--------|------|
@@ -129,6 +135,7 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 | `--no-price` | off | yfinance 실시간 가격 조회 건너뛰기 |
 | `--no-performance` | off | 3년 히스토리 조회 (Sharpe / α / β) 건너뛰기 |
 | `--no-technicals` | off | 테크니컬 지표 (RSI / MACD / MA) 건너뛰기 |
+| `--no-fundamentals` | off | 펀더멘털 대조 건너뛰기 |
 
 ### `weekly TICKER`
 Markdown 리포트를 생성하여 Obsidian 볼트에 기록합니다.
@@ -140,6 +147,7 @@ Markdown 리포트를 생성하여 Obsidian 볼트에 기록합니다.
 | `--no-price` | off | yfinance 실시간 가격 조회 건너뛰기 |
 | `--no-performance` | off | 3년 히스토리 조회 (Sharpe / α / β) 건너뛰기 |
 | `--no-technicals` | off | 테크니컬 지표 (RSI / MACD / MA) 건너뛰기 |
+| `--no-fundamentals` | off | 펀더멘털 대조 건너뛰기 |
 
 출력 경로: `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`.
 
@@ -263,6 +271,21 @@ Upside vs current price: +253.8%
 │ 200-day MA     │  $181.98 (+11.0%) │
 └────────────────┴───────────────────┘
 
+               Fundamentals Reality-Check
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                     ┃                   Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Trailing P/E               │                   41.24 │
+│ Forward P/E                │                   17.98 │
+│ Market Cap                 │                $4911.1B │
+│ Live β (yfinance)          │                    2.33 │
+│ Analyst target (mean)      │                 $268.61 │
+│ Analyst rec (1=SB/5=SS)    │                    1.29 │
+│ FCF registry / live / Δ    │ $60.0B / $58.1B / -3.1% │
+│ Shares registry / live / Δ │ 24.60B / 24.30B / -1.2% │
+└────────────────────────────┴─────────────────────────┘
+  ℹ️ Analyst consensus: $268.61 (+32.9% vs current, 56 analysts)
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -308,6 +331,7 @@ investment-engine/
 - 결정론적 Red/Blue 테제 스트레스 테스트 + Conviction score
 - 역사적 성과 (Sharpe / Sortino / 최대 낙폭 / VOO 대비 α-β)
 - 테크니컬 스냅샷 (RSI(14), MACD(12/26/9), 50일 / 200일 MA)
+- 펀더멘털 대조 (registry 가정 vs live FCF / 주식수; 애널리스트 컨센서스)
 - Obsidian Markdown 출력
 - yfinance 실시간 주가
 - macOS launchd 스케줄링

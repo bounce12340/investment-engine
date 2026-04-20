@@ -137,6 +137,29 @@ class TechnicalSnapshot(BaseModel):
     distance_from_ma200_pct: float
 
 
+class FundamentalsCheck(BaseModel):
+    trailing_pe: float | None = None
+    forward_pe: float | None = None
+    market_cap: float | None = None
+    live_beta: float | None = None
+    dividend_yield_pct: float | None = None
+
+    analyst_target_mean: float | None = None
+    analyst_target_median: float | None = None
+    analyst_count: int | None = None
+    analyst_recommendation: float | None = None
+
+    registry_fcf: float | None = None
+    live_fcf: float | None = None
+    fcf_delta_pct: float | None = None
+
+    registry_shares: float | None = None
+    live_shares: float | None = None
+    shares_delta_pct: float | None = None
+
+    flags: list[str] = []
+
+
 class WeeklyReport(BaseModel):
     ticker: str
     name: str
@@ -153,3 +176,4 @@ class WeeklyReport(BaseModel):
     stress_test: ThesisStressTest
     performance: PerformanceStats | None = None
     technicals: TechnicalSnapshot | None = None
+    fundamentals: FundamentalsCheck | None = None

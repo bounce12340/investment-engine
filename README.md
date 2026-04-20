@@ -84,10 +84,17 @@ computes **RSI(14), MACD (12/26/9), 50-day and 200-day moving averages**,
 plus distance-from-MA percentages. RSI ≥ 70 and ≤ 30 get annotated as
 overbought / oversold. Pure-pandas implementation — no new dependencies.
 
-**8. Live prices.** Current price fetched from Yahoo Finance via `yfinance`,
+**8. Fundamentals reality-check.** Each ticker's registry assumptions
+(DCF FCF, shares outstanding) are compared against live yfinance data.
+Also surfaces **trailing/forward P/E, market cap, live β, analyst consensus
+target, analyst recommendation (1=strongBuy … 5=strongSell), and
+dividend yield**. Flags fire when FCF drifts more than 25% or shares
+outstanding drift more than 5%, so stale registry entries stand out.
+
+**9. Live prices.** Current price fetched from Yahoo Finance via `yfinance`,
 with graceful fallback when offline.
 
-**9. Scheduling.** Daily / weekly / monthly recurring runs via macOS
+**10. Scheduling.** Daily / weekly / monthly recurring runs via macOS
 `launchd`. Interactive prompts or flags.
 
 ---
@@ -125,7 +132,8 @@ Works offline with `--no-price` (skips the yfinance call).
 
 ### `analyze TICKER`
 Prints a console summary: triangulated valuation, kill-switch status,
-historical performance, technical snapshot, and thesis stress test.
+historical performance, technical snapshot, fundamentals reality-check,
+and thesis stress test.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -133,6 +141,7 @@ historical performance, technical snapshot, and thesis stress test.
 | `--no-price` | off | Skip fetching live price from yfinance |
 | `--no-performance` | off | Skip fetching 3y history for Sharpe/α/β stats |
 | `--no-technicals` | off | Skip technical indicators (RSI/MACD/MA) |
+| `--no-fundamentals` | off | Skip fundamentals reality-check |
 
 ### `weekly TICKER`
 Generates a Markdown report and writes it into the Obsidian vault.
@@ -144,6 +153,7 @@ Generates a Markdown report and writes it into the Obsidian vault.
 | `--no-price` | off | Skip fetching live price from yfinance |
 | `--no-performance` | off | Skip fetching 3y history for Sharpe/α/β stats |
 | `--no-technicals` | off | Skip technical indicators (RSI/MACD/MA) |
+| `--no-fundamentals` | off | Skip fundamentals reality-check |
 
 Output path: `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`.
 
@@ -266,6 +276,21 @@ Upside vs current price: +253.8%
 │ 200-day MA     │  $181.98 (+11.0%) │
 └────────────────┴───────────────────┘
 
+               Fundamentals Reality-Check
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                     ┃                   Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Trailing P/E               │                   41.24 │
+│ Forward P/E                │                   17.98 │
+│ Market Cap                 │                $4911.1B │
+│ Live β (yfinance)          │                    2.33 │
+│ Analyst target (mean)      │                 $268.61 │
+│ Analyst rec (1=SB/5=SS)    │                    1.29 │
+│ FCF registry / live / Δ    │ $60.0B / $58.1B / -3.1% │
+│ Shares registry / live / Δ │ 24.60B / 24.30B / -1.2% │
+└────────────────────────────┴─────────────────────────┘
+  ℹ️ Analyst consensus: $268.61 (+32.9% vs current, 56 analysts)
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -311,6 +336,7 @@ investment-engine/
 - Deterministic Red/Blue thesis stress test with conviction score
 - Historical performance (Sharpe / Sortino / max drawdown / α-β vs VOO)
 - Technical snapshot (RSI(14), MACD(12/26/9), 50-day and 200-day MA)
+- Fundamentals reality-check (registry vs live FCF/shares; analyst consensus)
 - Obsidian Markdown output
 - Live prices via yfinance
 - macOS launchd scheduling

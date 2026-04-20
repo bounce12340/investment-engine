@@ -79,6 +79,51 @@ _Risk-free rate assumed 4.0%; α is Jensen's alpha annualized._
 _MACD defaults: 12/26/9. RSI >70 overbought, <30 oversold._
 
 {% endif -%}
+{% if report.fundamentals -%}
+## 🔍 Fundamentals Reality-Check
+
+{% set f = report.fundamentals -%}
+| Metric | Value |
+|--------|------:|
+{% if f.trailing_pe is not none -%}
+| Trailing P/E | {{ "%.2f"|format(f.trailing_pe) }} |
+{% endif -%}
+{% if f.forward_pe is not none -%}
+| Forward P/E | {{ "%.2f"|format(f.forward_pe) }} |
+{% endif -%}
+{% if f.market_cap is not none -%}
+| Market Cap | ${{ "%.1f"|format(f.market_cap / 1e9) }}B |
+{% endif -%}
+{% if f.live_beta is not none -%}
+| Live β (yfinance) | {{ "%.2f"|format(f.live_beta) }} |
+{% endif -%}
+{% if f.dividend_yield_pct is not none -%}
+| Dividend yield | {{ "%.2f"|format(f.dividend_yield_pct) }}% |
+{% endif -%}
+{% if f.analyst_target_mean is not none -%}
+| Analyst target (mean) | ${{ "%.2f"|format(f.analyst_target_mean) }} |
+{% endif -%}
+{% if f.analyst_recommendation is not none -%}
+| Analyst rec (1=strongBuy, 5=strongSell) | {{ "%.2f"|format(f.analyst_recommendation) }} |
+{% endif %}
+
+**Registry vs live:**
+
+| Item | Registry | Live | Δ |
+|------|---------:|-----:|---:|
+{% if f.registry_fcf is not none and f.live_fcf is not none -%}
+| FCF (TTM) | ${{ "%.2f"|format(f.registry_fcf / 1e9) }}B | ${{ "%.2f"|format(f.live_fcf / 1e9) }}B | {{ "%+.1f"|format(f.fcf_delta_pct) }}% |
+{% endif -%}
+{% if f.registry_shares is not none and f.live_shares is not none -%}
+| Shares outstanding | {{ "%.2f"|format(f.registry_shares / 1e9) }}B | {{ "%.2f"|format(f.live_shares / 1e9) }}B | {{ "%+.1f"|format(f.shares_delta_pct) }}% |
+{% endif %}
+
+**Flags:**
+{% for flag in f.flags -%}
+- {{ flag }}
+{% endfor %}
+
+{% endif -%}
 ## 🎯 Thesis Stress Test
 
 **Conviction score: {{ "%.1f"|format(report.stress_test.conviction_score) }} / 10**

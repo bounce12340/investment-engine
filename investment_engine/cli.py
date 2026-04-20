@@ -39,6 +39,7 @@ def analyze(
     no_price: bool = typer.Option(False, "--no-price", help="Skip fetching live price from yfinance"),
     no_performance: bool = typer.Option(False, "--no-performance", help="Skip fetching 3y history for performance stats"),
     no_technicals: bool = typer.Option(False, "--no-technicals", help="Skip technical indicators (RSI/MACD/MA)"),
+    no_fundamentals: bool = typer.Option(False, "--no-fundamentals", help="Skip fundamentals reality-check"),
 ) -> None:
     """Print a console summary of the ticker's triangulation and kill-switch status."""
     watcher = InvestmentWatcher(registry)
@@ -47,6 +48,7 @@ def analyze(
         fetch_price=not no_price,
         fetch_performance=not no_performance,
         fetch_technicals=not no_technicals,
+        fetch_fundamentals=not no_fundamentals,
     )
 
     header = f"[bold cyan]{report.ticker}[/bold cyan] — {report.name} ({report.year}-W{report.week:02d})"
@@ -133,6 +135,40 @@ def analyze(
             )
         console.print(perf_table)
 
+    if report.fundamentals:
+        console.print()
+        f = report.fundamentals
+        fund_table = Table(title="Fundamentals Reality-Check")
+        fund_table.add_column("Metric")
+        fund_table.add_column("Value", justify="right")
+        if f.trailing_pe is not None:
+            fund_table.add_row("Trailing P/E", f"{f.trailing_pe:.2f}")
+        if f.forward_pe is not None:
+            fund_table.add_row("Forward P/E", f"{f.forward_pe:.2f}")
+        if f.market_cap is not None:
+            fund_table.add_row("Market Cap", f"${f.market_cap/1e9:.1f}B")
+        if f.live_beta is not None:
+            fund_table.add_row("Live β (yfinance)", f"{f.live_beta:.2f}")
+        if f.dividend_yield_pct is not None:
+            fund_table.add_row("Dividend yield", f"{f.dividend_yield_pct:.2f}%")
+        if f.analyst_target_mean is not None:
+            fund_table.add_row("Analyst target (mean)", f"${f.analyst_target_mean:,.2f}")
+        if f.analyst_recommendation is not None:
+            fund_table.add_row("Analyst rec (1=SB/5=SS)", f"{f.analyst_recommendation:.2f}")
+        if f.registry_fcf is not None and f.live_fcf is not None:
+            fund_table.add_row(
+                "FCF registry / live / Δ",
+                f"${f.registry_fcf/1e9:.1f}B / ${f.live_fcf/1e9:.1f}B / {f.fcf_delta_pct:+.1f}%",
+            )
+        if f.registry_shares is not None and f.live_shares is not None:
+            fund_table.add_row(
+                "Shares registry / live / Δ",
+                f"{f.registry_shares/1e9:.2f}B / {f.live_shares/1e9:.2f}B / {f.shares_delta_pct:+.1f}%",
+            )
+        console.print(fund_table)
+        for flag in f.flags:
+            console.print(f"  {flag}")
+
     console.print()
     st = report.stress_test
     score_color = "green" if st.conviction_score >= 7 else "yellow" if st.conviction_score >= 4 else "red"
@@ -160,6 +196,7 @@ def weekly(
     no_price: bool = typer.Option(False, "--no-price", help="Skip fetching live price from yfinance"),
     no_performance: bool = typer.Option(False, "--no-performance", help="Skip fetching 3y history for performance stats"),
     no_technicals: bool = typer.Option(False, "--no-technicals", help="Skip technical indicators (RSI/MACD/MA)"),
+    no_fundamentals: bool = typer.Option(False, "--no-fundamentals", help="Skip fundamentals reality-check"),
 ) -> None:
     """Generate a weekly Markdown report and write it into the Obsidian vault."""
     watcher = InvestmentWatcher(registry)
@@ -168,6 +205,7 @@ def weekly(
         fetch_price=not no_price,
         fetch_performance=not no_performance,
         fetch_technicals=not no_technicals,
+        fetch_fundamentals=not no_fundamentals,
     )
     path = write_to_vault(report, vault)
     console.print(f"[green]✓[/green] Wrote weekly report: {path}")

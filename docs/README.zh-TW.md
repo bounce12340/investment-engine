@@ -75,9 +75,14 @@ Flag（ℹ️ info / ⚠️ warning / 🔴 alert）：
 50 日與 200 日均線、距 MA 百分比**。RSI ≥ 70 或 ≤ 30 自動標註
 超買 / 超賣。純 pandas 實作，沒有新依賴。
 
-**8. 即時股價。** 透過 `yfinance` 抓 Yahoo Finance 當前價格，離線時會 fallback。
+**8. 基本面對帳。** 對每個 ticker 從 yfinance 即時抓
+**trailing/forward P/E、市值、live β、分析師共識價、評等、股息率**；
+並把 registry 裡的 DCF 假設（FCF、流通股數）和 live 值做 delta 比對。
+FCF 差距超過 25% 或股數超過 5% 會自動標紅，讓 registry 陳舊處現形。
 
-**9. 排程。** macOS `launchd` 支援日 / 週 / 月循環執行，可互動選項或用 flag。
+**9. 即時股價。** 透過 `yfinance` 抓 Yahoo Finance 當前價格，離線時會 fallback。
+
+**10. 排程。** macOS `launchd` 支援日 / 週 / 月循環執行，可互動選項或用 flag。
 
 ---
 
@@ -113,7 +118,7 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 ## CLI 指令參考
 
 ### `analyze TICKER`
-輸出 console 摘要：三角估值、kill-switch 狀態、歷史績效、技術指標、論點壓力測試。
+輸出 console 摘要：三角估值、kill-switch 狀態、歷史績效、技術指標、基本面對帳、論點壓力測試。
 
 | 參數 | 預設 | 說明 |
 |------|------|------|
@@ -121,6 +126,7 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 | `--no-price` | off | 跳過 yfinance 即時股價抓取 |
 | `--no-performance` | off | 跳過 3 年歷史抓取（Sharpe / α / β） |
 | `--no-technicals` | off | 跳過技術指標（RSI / MACD / MA） |
+| `--no-fundamentals` | off | 跳過基本面對帳 |
 
 ### `weekly TICKER`
 產生 Markdown 週報並寫進 Obsidian vault。
@@ -132,6 +138,7 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 | `--no-price` | off | 跳過 yfinance 即時股價抓取 |
 | `--no-performance` | off | 跳過 3 年歷史抓取（Sharpe / α / β） |
 | `--no-technicals` | off | 跳過技術指標（RSI / MACD / MA） |
+| `--no-fundamentals` | off | 跳過基本面對帳 |
 
 輸出路徑：`{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`。
 
@@ -253,6 +260,21 @@ Upside vs current price: +253.8%
 │ 200-day MA     │  $181.98 (+11.0%) │
 └────────────────┴───────────────────┘
 
+               Fundamentals Reality-Check
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                     ┃                   Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Trailing P/E               │                   41.24 │
+│ Forward P/E                │                   17.98 │
+│ Market Cap                 │                $4911.1B │
+│ Live β (yfinance)          │                    2.33 │
+│ Analyst target (mean)      │                 $268.61 │
+│ Analyst rec (1=SB/5=SS)    │                    1.29 │
+│ FCF registry / live / Δ    │ $60.0B / $58.1B / -3.1% │
+│ Shares registry / live / Δ │ 24.60B / 24.30B / -1.2% │
+└────────────────────────────┴─────────────────────────┘
+  ℹ️ Analyst consensus: $268.61 (+32.9% vs current, 56 analysts)
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -297,6 +319,7 @@ investment-engine/
 - 確定性 Red/Blue 論點壓力測試 + 信心評分
 - 歷史績效（Sharpe / Sortino / 最大回撤 / 對 VOO 的 α-β）
 - 技術指標快照（RSI(14)、MACD(12/26/9)、50 日 / 200 日均線）
+- 基本面對帳（registry 假設 vs 即時 FCF / 股數；分析師共識）
 - Obsidian Markdown 輸出
 - 即時股價（yfinance）
 - macOS launchd 排程

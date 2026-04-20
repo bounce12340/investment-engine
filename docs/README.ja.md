@@ -81,10 +81,16 @@ Yahoo Finance から取得し、1y / 3y 窓での **Sharpe、Sortino、最大ド
 を計算します。RSI ≥ 70 / ≤ 30 は買われすぎ / 売られすぎとしてタグ付けされます。
 純粋な pandas 実装 — 追加依存なし。
 
-**8. リアルタイム株価。** `yfinance` 経由で Yahoo Finance から取得。
+**8. ファンダメンタルズ照合。** 各ティッカーについて yfinance から
+**trailing/forward P/E、時価総額、live β、アナリスト目標株価、レーティング、
+配当利回り** をリアルタイム取得。さらに registry の DCF 前提
+(FCF、発行済株式数) を live 値と突き合わせ、FCF が 25% 以上または株式数が
+5% 以上ずれると警告フラグを立てて登録値の陳腐化を顕在化します。
+
+**9. リアルタイム株価。** `yfinance` 経由で Yahoo Finance から取得。
 オフライン時は優雅にフォールバックします。
 
-**9. スケジューリング。** macOS `launchd` による日次 / 週次 / 月次の
+**10. スケジューリング。** macOS `launchd` による日次 / 週次 / 月次の
 定期実行。対話プロンプトまたはフラグで設定可能。
 
 ---
@@ -122,7 +128,8 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 
 ### `analyze TICKER`
 コンソール要約を出力：三角化バリュエーション、kill-switch ステータス、
-ヒストリカル・パフォーマンス、テクニカル・スナップショット、テーゼ・ストレステスト。
+ヒストリカル・パフォーマンス、テクニカル・スナップショット、ファンダメンタルズ照合、
+テーゼ・ストレステスト。
 
 | フラグ | デフォルト | 説明 |
 |--------|-----------|------|
@@ -130,6 +137,7 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 | `--no-price` | off | yfinance からの株価取得をスキップ |
 | `--no-performance` | off | 3 年ヒストリー取得（Sharpe / α / β）をスキップ |
 | `--no-technicals` | off | テクニカル指標（RSI / MACD / MA）をスキップ |
+| `--no-fundamentals` | off | ファンダメンタルズ照合をスキップ |
 
 ### `weekly TICKER`
 Markdown レポートを生成し Obsidian ボルトに書き込みます。
@@ -141,6 +149,7 @@ Markdown レポートを生成し Obsidian ボルトに書き込みます。
 | `--no-price` | off | yfinance からの株価取得をスキップ |
 | `--no-performance` | off | 3 年ヒストリー取得（Sharpe / α / β）をスキップ |
 | `--no-technicals` | off | テクニカル指標（RSI / MACD / MA）をスキップ |
+| `--no-fundamentals` | off | ファンダメンタルズ照合をスキップ |
 
 出力先：`{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`
 
@@ -263,6 +272,21 @@ Upside vs current price: +253.8%
 │ 200-day MA     │  $181.98 (+11.0%) │
 └────────────────┴───────────────────┘
 
+               Fundamentals Reality-Check
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                     ┃                   Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Trailing P/E               │                   41.24 │
+│ Forward P/E                │                   17.98 │
+│ Market Cap                 │                $4911.1B │
+│ Live β (yfinance)          │                    2.33 │
+│ Analyst target (mean)      │                 $268.61 │
+│ Analyst rec (1=SB/5=SS)    │                    1.29 │
+│ FCF registry / live / Δ    │ $60.0B / $58.1B / -3.1% │
+│ Shares registry / live / Δ │ 24.60B / 24.30B / -1.2% │
+└────────────────────────────┴─────────────────────────┘
+  ℹ️ Analyst consensus: $268.61 (+32.9% vs current, 56 analysts)
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -308,6 +332,7 @@ investment-engine/
 - 決定論的 Red/Blue テーゼ・ストレステスト + Conviction score
 - ヒストリカル・パフォーマンス（Sharpe / Sortino / 最大 DD / VOO 対比 α-β）
 - テクニカル・スナップショット（RSI(14)、MACD(12/26/9)、50日 / 200日 MA）
+- ファンダメンタルズ照合（registry 前提 vs live FCF / 株式数；アナリスト・コンセンサス）
 - Obsidian Markdown 出力
 - yfinance リアルタイム株価
 - macOS launchd スケジューリング

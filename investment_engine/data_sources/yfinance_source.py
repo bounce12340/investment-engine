@@ -30,3 +30,16 @@ def get_price_history(ticker: str, period: str = "3y") -> "pd.Series | None":
     if series.empty:
         return None
     return series
+
+
+def get_ticker_info(ticker: str) -> dict | None:
+    """Return yfinance Ticker.info dict. Returns None on any failure."""
+    import yfinance as yf
+
+    try:
+        info = yf.Ticker(ticker).info
+    except Exception:
+        return None
+    if not info or not isinstance(info, dict):
+        return None
+    return info
