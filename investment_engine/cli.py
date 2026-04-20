@@ -38,6 +38,7 @@ def analyze(
     registry: Path = typer.Option(DEFAULT_REGISTRY, "--registry", help="Path to monitor-registry.json"),
     no_price: bool = typer.Option(False, "--no-price", help="Skip fetching live price from yfinance"),
     no_performance: bool = typer.Option(False, "--no-performance", help="Skip fetching 3y history for performance stats"),
+    no_technicals: bool = typer.Option(False, "--no-technicals", help="Skip technical indicators (RSI/MACD/MA)"),
 ) -> None:
     """Print a console summary of the ticker's triangulation and kill-switch status."""
     watcher = InvestmentWatcher(registry)
@@ -45,6 +46,7 @@ def analyze(
         ticker.upper(),
         fetch_price=not no_price,
         fetch_performance=not no_performance,
+        fetch_technicals=not no_technicals,
     )
 
     header = f"[bold cyan]{report.ticker}[/bold cyan] — {report.name} ({report.year}-W{report.week:02d})"
@@ -80,6 +82,32 @@ def analyze(
     fired = triggered(report.kill_switches)
     if fired:
         console.print(f"\n[bold red]⚠ {len(fired)} kill-switch(es) triggered.[/bold red]")
+
+    if report.technicals:
+        console.print()
+        tech = report.technicals
+        rsi_tag = ""
+        if tech.rsi_14 >= 70:
+            rsi_tag = " [red](overbought)[/red]"
+        elif tech.rsi_14 <= 30:
+            rsi_tag = " [green](oversold)[/green]"
+        tech_table = Table(title="Technical Snapshot")
+        tech_table.add_column("Indicator")
+        tech_table.add_column("Value", justify="right")
+        tech_table.add_row("Price", f"${tech.price:.2f}")
+        tech_table.add_row("RSI(14)", f"{tech.rsi_14:.1f}{rsi_tag}")
+        tech_table.add_row("MACD", f"{tech.macd:.3f}")
+        tech_table.add_row("MACD signal", f"{tech.macd_signal:.3f}")
+        tech_table.add_row("MACD histogram", f"{tech.macd_histogram:+.3f}")
+        tech_table.add_row(
+            "50-day MA",
+            f"${tech.ma_50:.2f} ({tech.distance_from_ma50_pct:+.1f}%)",
+        )
+        tech_table.add_row(
+            "200-day MA",
+            f"${tech.ma_200:.2f} ({tech.distance_from_ma200_pct:+.1f}%)",
+        )
+        console.print(tech_table)
 
     if report.performance and report.performance.periods:
         console.print()
@@ -131,6 +159,7 @@ def weekly(
     vault: Path = typer.Option(Path(DEFAULT_VAULT), "--vault", help="Obsidian vault path"),
     no_price: bool = typer.Option(False, "--no-price", help="Skip fetching live price from yfinance"),
     no_performance: bool = typer.Option(False, "--no-performance", help="Skip fetching 3y history for performance stats"),
+    no_technicals: bool = typer.Option(False, "--no-technicals", help="Skip technical indicators (RSI/MACD/MA)"),
 ) -> None:
     """Generate a weekly Markdown report and write it into the Obsidian vault."""
     watcher = InvestmentWatcher(registry)
@@ -138,6 +167,7 @@ def weekly(
         ticker.upper(),
         fetch_price=not no_price,
         fetch_performance=not no_performance,
+        fetch_technicals=not no_technicals,
     )
     path = write_to_vault(report, vault)
     console.print(f"[green]✓[/green] Wrote weekly report: {path}")

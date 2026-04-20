@@ -125,6 +125,18 @@ class PerformanceStats(BaseModel):
     periods: list[PeriodPerformance]
 
 
+class TechnicalSnapshot(BaseModel):
+    price: float
+    rsi_14: float
+    macd: float
+    macd_signal: float
+    macd_histogram: float
+    ma_50: float
+    ma_200: float
+    distance_from_ma50_pct: float
+    distance_from_ma200_pct: float
+
+
 class WeeklyReport(BaseModel):
     ticker: str
     name: str
@@ -140,3 +152,4 @@ class WeeklyReport(BaseModel):
     bear_points: list[str]
     stress_test: ThesisStressTest
     performance: PerformanceStats | None = None
+    technicals: TechnicalSnapshot | None = None

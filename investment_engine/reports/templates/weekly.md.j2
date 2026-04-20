@@ -63,6 +63,22 @@
 _Risk-free rate assumed 4.0%; α is Jensen's alpha annualized._
 
 {% endif -%}
+{% if report.technicals -%}
+## 📊 Technical Snapshot
+
+| Indicator | Value |
+|-----------|------:|
+| Price | ${{ "%.2f"|format(report.technicals.price) }} |
+| RSI(14) | {{ "%.1f"|format(report.technicals.rsi_14) }}{% if report.technicals.rsi_14 >= 70 %} _(overbought)_{% elif report.technicals.rsi_14 <= 30 %} _(oversold)_{% endif %} |
+| MACD | {{ "%.3f"|format(report.technicals.macd) }} |
+| MACD signal | {{ "%.3f"|format(report.technicals.macd_signal) }} |
+| MACD histogram | {{ "%+.3f"|format(report.technicals.macd_histogram) }} |
+| 50-day MA | ${{ "%.2f"|format(report.technicals.ma_50) }} ({{ "%+.1f"|format(report.technicals.distance_from_ma50_pct) }}%) |
+| 200-day MA | ${{ "%.2f"|format(report.technicals.ma_200) }} ({{ "%+.1f"|format(report.technicals.distance_from_ma200_pct) }}%) |
+
+_MACD defaults: 12/26/9. RSI >70 overbought, <30 oversold._
+
+{% endif -%}
 ## 🎯 Thesis Stress Test
 
 **Conviction score: {{ "%.1f"|format(report.stress_test.conviction_score) }} / 10**

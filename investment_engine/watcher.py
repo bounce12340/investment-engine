@@ -5,6 +5,7 @@ from pathlib import Path
 
 from investment_engine.analysis.performance import compute_performance_stats
 from investment_engine.analysis.red_blue_team import stress_test
+from investment_engine.analysis.technicals import MIN_HISTORY, compute_technical_snapshot
 from investment_engine.data_sources.registry import load_ticker
 from investment_engine.data_sources.yfinance_source import (
     get_current_price,
@@ -12,6 +13,7 @@ from investment_engine.data_sources.yfinance_source import (
 )
 from investment_engine.models import (
     PerformanceStats,
+    TechnicalSnapshot,
     TickerThesis,
     ValuationResult,
     WeeklyReport,
@@ -40,26 +42,13 @@ class InvestmentWatcher:
             relative_target=relative_valuation(v.relative),
         )
 
-    def _fetch_performance(self, ticker: str) -> PerformanceStats | None:
-        try:
-            prices = get_price_history(ticker, period="3y")
-            bench = get_price_history(BENCHMARK_TICKER, period="3y")
-        except Exception:
-            return None
-        if prices is None or bench is None:
-            return None
-        try:
-            stats = compute_performance_stats(prices, bench)
-        except Exception:
-            return None
-        return stats if stats.periods else None
-
     def build_report(
         self,
         ticker: str,
         as_of: date | None = None,
         fetch_price: bool = True,
         fetch_performance: bool = True,
+        fetch_technicals: bool = True,
     ) -> WeeklyReport:
         thesis = self.load(ticker)
         valuation = self.valuate(thesis)
@@ -75,8 +64,34 @@ class InvestmentWatcher:
                 price = None
 
         performance: PerformanceStats | None = None
-        if fetch_performance:
-            performance = self._fetch_performance(ticker)
+        technicals: TechnicalSnapshot | None = None
+
+        if fetch_performance or fetch_technicals:
+            try:
+                prices = get_price_history(ticker, period="3y")
+            except Exception:
+                prices = None
+
+            bench = None
+            if fetch_performance and prices is not None:
+                try:
+                    bench = get_price_history(BENCHMARK_TICKER, period="3y")
+                except Exception:
+                    bench = None
+
+            if fetch_performance and prices is not None and bench is not None:
+                try:
+                    stats = compute_performance_stats(prices, bench)
+                    if stats.periods:
+                        performance = stats
+                except Exception:
+                    performance = None
+
+            if fetch_technicals and prices is not None and len(prices) >= MIN_HISTORY:
+                try:
+                    technicals = compute_technical_snapshot(prices)
+                except Exception:
+                    technicals = None
 
         return WeeklyReport(
             ticker=thesis.ticker,
@@ -95,4 +110,5 @@ class InvestmentWatcher:
                 thesis.bull_points, thesis.bear_points, thesis.kill_switches
             ),
             performance=performance,
+            technicals=technicals,
         )

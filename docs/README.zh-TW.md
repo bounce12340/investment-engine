@@ -71,9 +71,13 @@ Flag（ℹ️ info / ⚠️ warning / 🔴 alert）：
 （risk-free rate = 4.0%）。報告和 `analyze` CLI 都會多一個
 「Historical Performance」區塊。
 
-**7. 即時股價。** 透過 `yfinance` 抓 Yahoo Finance 當前價格，離線時會 fallback。
+**7. 技術指標快照。** 用同一份 3 年日線計算 **RSI(14)、MACD (12/26/9)、
+50 日與 200 日均線、距 MA 百分比**。RSI ≥ 70 或 ≤ 30 自動標註
+超買 / 超賣。純 pandas 實作，沒有新依賴。
 
-**8. 排程。** macOS `launchd` 支援日 / 週 / 月循環執行，可互動選項或用 flag。
+**8. 即時股價。** 透過 `yfinance` 抓 Yahoo Finance 當前價格，離線時會 fallback。
+
+**9. 排程。** macOS `launchd` 支援日 / 週 / 月循環執行，可互動選項或用 flag。
 
 ---
 
@@ -109,13 +113,14 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 ## CLI 指令參考
 
 ### `analyze TICKER`
-輸出 console 摘要：三角估值、kill-switch 狀態、歷史績效、論點壓力測試。
+輸出 console 摘要：三角估值、kill-switch 狀態、歷史績效、技術指標、論點壓力測試。
 
 | 參數 | 預設 | 說明 |
 |------|------|------|
 | `--registry PATH` | `data/monitor-registry.json` | 自訂 registry 檔 |
 | `--no-price` | off | 跳過 yfinance 即時股價抓取 |
 | `--no-performance` | off | 跳過 3 年歷史抓取（Sharpe / α / β） |
+| `--no-technicals` | off | 跳過技術指標（RSI / MACD / MA） |
 
 ### `weekly TICKER`
 產生 Markdown 週報並寫進 Obsidian vault。
@@ -126,6 +131,7 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 | `--vault PATH` | `$OBSIDIAN_VAULT` 或 `/Users/chunghsutsai/Vault` | Vault 路徑 |
 | `--no-price` | off | 跳過 yfinance 即時股價抓取 |
 | `--no-performance` | off | 跳過 3 年歷史抓取（Sharpe / α / β） |
+| `--no-technicals` | off | 跳過技術指標（RSI / MACD / MA） |
 
 輸出路徑：`{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`。
 
@@ -234,6 +240,19 @@ Upside vs current price: +253.8%
 │ 3y     │ +120.8% │ 48.8% │   2.39 │    3.72 │ -36.9% │   +76.2% │ 2.13 │
 └────────┴─────────┴───────┴────────┴─────────┴────────┴──────────┴──────┘
 
+          Technical Snapshot
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+┃ Indicator      ┃             Value ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+│ Price          │           $202.06 │
+│ RSI(14)        │ 71.6 (overbought) │
+│ MACD           │             5.344 │
+│ MACD signal    │             2.437 │
+│ MACD histogram │            +2.907 │
+│ 50-day MA      │   $183.90 (+9.9%) │
+│ 200-day MA     │  $181.98 (+11.0%) │
+└────────────────┴───────────────────┘
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -277,6 +296,7 @@ investment-engine/
 - 靜態 kill-switch 檢查
 - 確定性 Red/Blue 論點壓力測試 + 信心評分
 - 歷史績效（Sharpe / Sortino / 最大回撤 / 對 VOO 的 α-β）
+- 技術指標快照（RSI(14)、MACD(12/26/9)、50 日 / 200 日均線）
 - Obsidian Markdown 輸出
 - 即時股價（yfinance）
 - macOS launchd 排程

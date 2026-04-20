@@ -79,10 +79,15 @@ annualized volatility, and Jensen's α / β vs VOO** over 1y and 3y windows
 (risk-free rate = 4.0%). Adds a `## Historical Performance` section to every
 report and a Rich table in `analyze`.
 
-**7. Live prices.** Current price fetched from Yahoo Finance via `yfinance`,
+**7. Technical snapshot.** From the same 3-year close series the engine
+computes **RSI(14), MACD (12/26/9), 50-day and 200-day moving averages**,
+plus distance-from-MA percentages. RSI ≥ 70 and ≤ 30 get annotated as
+overbought / oversold. Pure-pandas implementation — no new dependencies.
+
+**8. Live prices.** Current price fetched from Yahoo Finance via `yfinance`,
 with graceful fallback when offline.
 
-**8. Scheduling.** Daily / weekly / monthly recurring runs via macOS
+**9. Scheduling.** Daily / weekly / monthly recurring runs via macOS
 `launchd`. Interactive prompts or flags.
 
 ---
@@ -120,13 +125,14 @@ Works offline with `--no-price` (skips the yfinance call).
 
 ### `analyze TICKER`
 Prints a console summary: triangulated valuation, kill-switch status,
-historical performance, and thesis stress test.
+historical performance, technical snapshot, and thesis stress test.
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--registry PATH` | `data/monitor-registry.json` | Custom registry file |
 | `--no-price` | off | Skip fetching live price from yfinance |
 | `--no-performance` | off | Skip fetching 3y history for Sharpe/α/β stats |
+| `--no-technicals` | off | Skip technical indicators (RSI/MACD/MA) |
 
 ### `weekly TICKER`
 Generates a Markdown report and writes it into the Obsidian vault.
@@ -137,6 +143,7 @@ Generates a Markdown report and writes it into the Obsidian vault.
 | `--vault PATH` | `$OBSIDIAN_VAULT` or `/Users/chunghsutsai/Vault` | Target vault |
 | `--no-price` | off | Skip fetching live price from yfinance |
 | `--no-performance` | off | Skip fetching 3y history for Sharpe/α/β stats |
+| `--no-technicals` | off | Skip technical indicators (RSI/MACD/MA) |
 
 Output path: `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`.
 
@@ -246,6 +253,19 @@ Upside vs current price: +253.8%
 │ 3y     │ +120.8% │ 48.8% │   2.39 │    3.72 │ -36.9% │   +76.2% │ 2.13 │
 └────────┴─────────┴───────┴────────┴─────────┴────────┴──────────┴──────┘
 
+          Technical Snapshot
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+┃ Indicator      ┃             Value ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+│ Price          │           $202.06 │
+│ RSI(14)        │ 71.6 (overbought) │
+│ MACD           │             5.344 │
+│ MACD signal    │             2.437 │
+│ MACD histogram │            +2.907 │
+│ 50-day MA      │   $183.90 (+9.9%) │
+│ 200-day MA     │  $181.98 (+11.0%) │
+└────────────────┴───────────────────┘
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -290,6 +310,7 @@ investment-engine/
 - Static kill-switch checks
 - Deterministic Red/Blue thesis stress test with conviction score
 - Historical performance (Sharpe / Sortino / max drawdown / α-β vs VOO)
+- Technical snapshot (RSI(14), MACD(12/26/9), 50-day and 200-day MA)
 - Obsidian Markdown output
 - Live prices via yfinance
 - macOS launchd scheduling

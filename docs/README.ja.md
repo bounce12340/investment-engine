@@ -76,10 +76,15 @@ Yahoo Finance から取得し、1y / 3y 窓での **Sharpe、Sortino、最大ド
 年率ボラティリティ、VOO 対比の Jensen α / β**（無リスク金利 = 4.0%）を算出します。
 レポートと `analyze` CLI に「Historical Performance」セクションを追加します。
 
-**7. リアルタイム株価。** `yfinance` 経由で Yahoo Finance から取得。
+**7. テクニカル・スナップショット。** 同じ 3 年分の終値から
+**RSI(14)、MACD (12/26/9)、50 日および 200 日移動平均、MA からの乖離率**
+を計算します。RSI ≥ 70 / ≤ 30 は買われすぎ / 売られすぎとしてタグ付けされます。
+純粋な pandas 実装 — 追加依存なし。
+
+**8. リアルタイム株価。** `yfinance` 経由で Yahoo Finance から取得。
 オフライン時は優雅にフォールバックします。
 
-**8. スケジューリング。** macOS `launchd` による日次 / 週次 / 月次の
+**9. スケジューリング。** macOS `launchd` による日次 / 週次 / 月次の
 定期実行。対話プロンプトまたはフラグで設定可能。
 
 ---
@@ -117,13 +122,14 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 
 ### `analyze TICKER`
 コンソール要約を出力：三角化バリュエーション、kill-switch ステータス、
-ヒストリカル・パフォーマンス、テーゼ・ストレステスト。
+ヒストリカル・パフォーマンス、テクニカル・スナップショット、テーゼ・ストレステスト。
 
 | フラグ | デフォルト | 説明 |
 |--------|-----------|------|
 | `--registry PATH` | `data/monitor-registry.json` | カスタム registry ファイル |
 | `--no-price` | off | yfinance からの株価取得をスキップ |
 | `--no-performance` | off | 3 年ヒストリー取得（Sharpe / α / β）をスキップ |
+| `--no-technicals` | off | テクニカル指標（RSI / MACD / MA）をスキップ |
 
 ### `weekly TICKER`
 Markdown レポートを生成し Obsidian ボルトに書き込みます。
@@ -134,6 +140,7 @@ Markdown レポートを生成し Obsidian ボルトに書き込みます。
 | `--vault PATH` | `$OBSIDIAN_VAULT` または `/Users/chunghsutsai/Vault` | 対象ボルト |
 | `--no-price` | off | yfinance からの株価取得をスキップ |
 | `--no-performance` | off | 3 年ヒストリー取得（Sharpe / α / β）をスキップ |
+| `--no-technicals` | off | テクニカル指標（RSI / MACD / MA）をスキップ |
 
 出力先：`{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`
 
@@ -243,6 +250,19 @@ Upside vs current price: +253.8%
 │ 3y     │ +120.8% │ 48.8% │   2.39 │    3.72 │ -36.9% │   +76.2% │ 2.13 │
 └────────┴─────────┴───────┴────────┴─────────┴────────┴──────────┴──────┘
 
+          Technical Snapshot
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+┃ Indicator      ┃             Value ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+│ Price          │           $202.06 │
+│ RSI(14)        │ 71.6 (overbought) │
+│ MACD           │             5.344 │
+│ MACD signal    │             2.437 │
+│ MACD histogram │            +2.907 │
+│ 50-day MA      │   $183.90 (+9.9%) │
+│ 200-day MA     │  $181.98 (+11.0%) │
+└────────────────┴───────────────────┘
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -287,6 +307,7 @@ investment-engine/
 - 静的 kill-switch チェック
 - 決定論的 Red/Blue テーゼ・ストレステスト + Conviction score
 - ヒストリカル・パフォーマンス（Sharpe / Sortino / 最大 DD / VOO 対比 α-β）
+- テクニカル・スナップショット（RSI(14)、MACD(12/26/9)、50日 / 200日 MA）
 - Obsidian Markdown 出力
 - yfinance リアルタイム株価
 - macOS launchd スケジューリング
