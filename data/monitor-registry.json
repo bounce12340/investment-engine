@@ -1,0 +1,416 @@
+{
+  "NVDA": {
+    "ticker": "NVDA",
+    "name": "NVIDIA Corporation",
+    "sector": "AI Infrastructure",
+    "thesis": {
+      "short_term": "Blackwell ramp and sovereign AI demand keep data-center revenue elevated; option skew remains bullish.",
+      "medium_term": "Inference workload transition and cloud CapEx ROI questions are the key pivot — margin durability depends on software moat (CUDA, Dynamo).",
+      "long_term": "Paradigm shift risk: algorithmic efficiency gains (e.g. on-device inference, ASIC competition) could erode the compute-intensive moat over 5-10y."
+    },
+    "leading_indicators": [
+      {"name": "CUDA Ecosystem Share", "value": 92.0, "unit": "%", "description": "Share of AI training/inference workloads on CUDA"},
+      {"name": "Data Center Revenue YoY", "value": 217.0, "unit": "%", "description": "Year-over-year growth of DC segment"},
+      {"name": "Blackwell Adoption", "value": 45.0, "unit": "% of new deployments", "description": "Share of new hyperscaler deployments using Blackwell"},
+      {"name": "Gross Margin", "value": 75.5, "unit": "%", "description": "GAAP gross margin"}
+    ],
+    "kill_switches": [
+      {"name": "CUDA dominance erosion", "metric": "CUDA Ecosystem Share %", "threshold": 80.0, "direction": "below", "current_value": 92.0},
+      {"name": "Gross margin compression", "metric": "Gross Margin %", "threshold": 60.0, "direction": "below", "current_value": 75.5},
+      {"name": "DC growth collapse", "metric": "Data Center YoY %", "threshold": 30.0, "direction": "below", "current_value": 217.0},
+      {"name": "Inventory days blowout", "metric": "Inventory days", "threshold": 120.0, "direction": "above", "current_value": 85.0}
+    ],
+    "bull_points": [
+      "CUDA software moat remains structurally intact; >1M developers and rising.",
+      "Sovereign AI deals (Saudi, UAE, EU) add multi-year revenue visibility.",
+      "Networking (NVLink, Spectrum-X) becoming its own $10B+ franchise.",
+      "Blackwell uplift in perf/watt keeps hyperscaler CapEx ROI positive.",
+      "Automotive/robotics optionality priced at near-zero today."
+    ],
+    "bear_points": [
+      "Customer concentration: top 4 hyperscalers ~40% of revenue; any CapEx pause hits hard.",
+      "Inference workloads can run on cheaper ASICs (Trainium, TPU, Groq) — long-term margin risk.",
+      "China export restrictions cut an addressable market and force margin-dilutive H20 variants.",
+      "AMD MI300X gaining meaningful traction in specific enterprise pockets.",
+      "Valuation premium leaves no room for any growth deceleration surprise."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 60000000000, "growth_high": 0.25, "growth_terminal": 0.03, "years_high": 5, "wacc": 0.09, "shares": 24600000000},
+      "scenarios": [
+        {"name": "Bull", "price": 1400.0, "probability": 0.25},
+        {"name": "Base", "price": 1080.0, "probability": 0.55},
+        {"name": "Bear", "price": 650.0, "probability": 0.20}
+      ],
+      "relative": {"ticker_metric": 28.5, "peer_median": 34.0, "target_metric": "Forward EPS × peer-median P/E"}
+    }
+  },
+  "PLTR": {
+    "ticker": "PLTR",
+    "name": "Palantir Technologies",
+    "sector": "AI Infrastructure",
+    "thesis": {
+      "short_term": "Commercial US revenue and defense budget tailwinds sustain 30%+ growth; AIP bootcamps converting pipeline to TCV.",
+      "medium_term": "Path to Rule-of-60 operating model hinges on commercial net retention and disciplined S&M leverage.",
+      "long_term": "Category-defining data operating system for defense + large enterprises; moat is integration depth, not ML commodities."
+    },
+    "leading_indicators": [
+      {"name": "US Commercial Revenue YoY", "value": 65.0, "unit": "%", "description": "YoY growth of US commercial segment"},
+      {"name": "Net Dollar Retention", "value": 118.0, "unit": "%", "description": "Net revenue retention on existing customers"},
+      {"name": "Rule of 40 Score", "value": 81.0, "unit": "", "description": "Revenue growth % + FCF margin %"}
+    ],
+    "kill_switches": [
+      {"name": "US Commercial growth stall", "metric": "US Comm YoY %", "threshold": 25.0, "direction": "below", "current_value": 65.0},
+      {"name": "NDR breakdown", "metric": "Net Dollar Retention %", "threshold": 105.0, "direction": "below", "current_value": 118.0},
+      {"name": "FCF margin compression", "metric": "FCF Margin %", "threshold": 20.0, "direction": "below", "current_value": 40.0}
+    ],
+    "bull_points": [
+      "Ontology + AIP is the only production-grade deployment layer for enterprise LLMs at scale.",
+      "Defense franchise (TITAN, Maven) creates multi-year backlog insulated from IT budget cycles.",
+      "Operating leverage: S&M expense line flat while revenue compounds 30%+.",
+      "Founder-led; long-dated option on commercial AI adoption curve."
+    ],
+    "bear_points": [
+      "Valuation trades at 50-80x forward FCF, priced for perfection.",
+      "Concentrated customer base in government segment limits duration.",
+      "Share-based comp dilution remains elevated.",
+      "Competitors (Snowflake, Databricks, hyperscaler stacks) erode differentiation in vanilla use cases."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 1300000000, "growth_high": 0.35, "growth_terminal": 0.035, "years_high": 7, "wacc": 0.10, "shares": 2400000000},
+      "scenarios": [
+        {"name": "Bull", "price": 120.0, "probability": 0.25},
+        {"name": "Base", "price": 75.0, "probability": 0.50},
+        {"name": "Bear", "price": 35.0, "probability": 0.25}
+      ],
+      "relative": {"ticker_metric": 0.15, "peer_median": 180.0, "target_metric": "Forward FCF/share × peer-median P/FCF"}
+    }
+  },
+  "GOOGL": {
+    "ticker": "GOOGL",
+    "name": "Alphabet Inc.",
+    "sector": "Big Tech",
+    "thesis": {
+      "short_term": "Search query volume remains resilient despite AI disruption; Gemini 3.0 launch closes product-gap narrative.",
+      "medium_term": "Cloud (GCP) reaching structural profitability with AI training workload share; YouTube monetization has legs.",
+      "long_term": "TPU silicon stack + Gemini models + Google-scale data form a vertical moat that's unique in big tech."
+    },
+    "leading_indicators": [
+      {"name": "Search Revenue YoY", "value": 12.0, "unit": "%", "description": "YoY growth in Search & Other"},
+      {"name": "Google Cloud YoY", "value": 35.0, "unit": "%", "description": "YoY growth GCP"},
+      {"name": "Operating Margin", "value": 32.0, "unit": "%", "description": "Consolidated operating margin"}
+    ],
+    "kill_switches": [
+      {"name": "Search revenue reversal", "metric": "Search YoY %", "threshold": 5.0, "direction": "below", "current_value": 12.0},
+      {"name": "GCP growth collapse", "metric": "GCP YoY %", "threshold": 20.0, "direction": "below", "current_value": 35.0},
+      {"name": "Operating margin compression", "metric": "Op margin %", "threshold": 25.0, "direction": "below", "current_value": 32.0}
+    ],
+    "bull_points": [
+      "TPU vertical stack gives Alphabet unit economics advantage vs GPU-dependent competitors.",
+      "YouTube Shorts monetization gap closing vs TikTok.",
+      "Waymo optionality essentially free at current valuation.",
+      "Capital return program (buybacks + dividend) supports floor."
+    ],
+    "bear_points": [
+      "Antitrust remedies could force Search-default unbundling, hitting TAC economics.",
+      "ChatGPT-class assistants structurally reduce high-intent commercial queries.",
+      "CapEx step-up for AI infra compresses near-term FCF.",
+      "YouTube faces durable ad-market share pressure from Meta Reels."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 72000000000, "growth_high": 0.10, "growth_terminal": 0.03, "years_high": 10, "wacc": 0.085, "shares": 12400000000},
+      "scenarios": [
+        {"name": "Bull", "price": 260.0, "probability": 0.30},
+        {"name": "Base", "price": 210.0, "probability": 0.50},
+        {"name": "Bear", "price": 150.0, "probability": 0.20}
+      ],
+      "relative": {"ticker_metric": 9.20, "peer_median": 22.0, "target_metric": "Forward EPS × peer-median P/E"}
+    }
+  },
+  "MP": {
+    "ticker": "MP",
+    "name": "MP Materials",
+    "sector": "Strategic Resources",
+    "thesis": {
+      "short_term": "DoD magnet offtake contract provides revenue floor; NdPr pricing stabilizing off cycle lows.",
+      "medium_term": "Stage-II (separation) + Stage-III (magnet production) execution is the key fundamental pivot — margin profile transforms once vertically integrated.",
+      "long_term": "Only at-scale non-China rare earth supply chain; strategic premium expands as decoupling narrative persists."
+    },
+    "leading_indicators": [
+      {"name": "NdPr Price", "value": 62.0, "unit": "$/kg", "description": "Spot NdPr oxide pricing"},
+      {"name": "Magnet Facility Utilization", "value": 15.0, "unit": "%", "description": "Texas magnet plant ramp utilization"},
+      {"name": "Gross Margin", "value": 8.0, "unit": "%", "description": "Consolidated gross margin"}
+    ],
+    "kill_switches": [
+      {"name": "NdPr price crash", "metric": "NdPr $/kg", "threshold": 45.0, "direction": "below", "current_value": 62.0},
+      {"name": "DoD contract risk", "metric": "DoD Offtake Active", "threshold": 0.5, "direction": "below", "current_value": 1.0},
+      {"name": "Stage-III ramp stall", "metric": "Magnet Utilization %", "threshold": 5.0, "direction": "below", "current_value": 15.0}
+    ],
+    "bull_points": [
+      "Strategic monopoly on US rare earth supply chain with DoD backing.",
+      "Vertical integration (mine → separation → magnet) triples revenue per ton of ore.",
+      "EV + defense + wind demand creates structural NdPr tailwind post-2026.",
+      "Tariff policy on Chinese magnets provides pricing umbrella."
+    ],
+    "bear_points": [
+      "Chinese producers can dump supply to suppress pricing during political cycles.",
+      "Stage-III execution risk remains high; first magnet shipments slipping.",
+      "Capex-heavy business; debt funding dilutive.",
+      "NdPr demand elasticity poorly understood — substitution risk in EV motors."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 50000000, "growth_high": 0.40, "growth_terminal": 0.03, "years_high": 7, "wacc": 0.11, "shares": 180000000},
+      "scenarios": [
+        {"name": "Bull", "price": 45.0, "probability": 0.30},
+        {"name": "Base", "price": 28.0, "probability": 0.45},
+        {"name": "Bear", "price": 12.0, "probability": 0.25}
+      ],
+      "relative": {"ticker_metric": 0.25, "peer_median": 80.0, "target_metric": "2027E EPS × peer-median P/E"}
+    }
+  },
+  "NU": {
+    "ticker": "NU",
+    "name": "Nu Holdings",
+    "sector": "FinTech",
+    "thesis": {
+      "short_term": "Brazil + Mexico customer adds driving ARPAC expansion; credit cost cycle stabilizing.",
+      "medium_term": "Cross-sell into payroll lending and SME products lifts unit economics without proportional CAC.",
+      "long_term": "LatAm's best-positioned consumer bank; Mexico/Colombia scale replicates Brazil playbook."
+    },
+    "leading_indicators": [
+      {"name": "Customers", "value": 105.0, "unit": "M", "description": "Total active customers"},
+      {"name": "ARPAC", "value": 11.5, "unit": "$/month", "description": "Average revenue per active customer"},
+      {"name": "Efficiency Ratio", "value": 32.0, "unit": "%", "description": "Opex / revenue"}
+    ],
+    "kill_switches": [
+      {"name": "ARPAC stall", "metric": "ARPAC $", "threshold": 9.0, "direction": "below", "current_value": 11.5},
+      {"name": "Efficiency blowout", "metric": "Efficiency ratio %", "threshold": 45.0, "direction": "above", "current_value": 32.0},
+      {"name": "NPL spike", "metric": "NPL 90+ %", "threshold": 8.0, "direction": "above", "current_value": 5.8}
+    ],
+    "bull_points": [
+      "Lowest-cost banking operator in LatAm; structural cost advantage compounds.",
+      "Mexico ramp repeating Brazil's vintage curve on accelerated timeline.",
+      "High-margin payroll lending ramp adds durable NII expansion.",
+      "Founder alignment; long-duration incentive structure."
+    ],
+    "bear_points": [
+      "Brazilian macro (Selic, FX) drives meaningful earnings volatility.",
+      "Credit cycle risk elevated as LatAm consumer leverage rises.",
+      "Traditional LatAm banks (Itaú, Bradesco) aggressively cutting fees defensively.",
+      "Regulatory risk from BCB on interchange/credit card economics."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 2500000000, "growth_high": 0.28, "growth_terminal": 0.03, "years_high": 7, "wacc": 0.12, "shares": 4800000000},
+      "scenarios": [
+        {"name": "Bull", "price": 22.0, "probability": 0.25},
+        {"name": "Base", "price": 15.0, "probability": 0.55},
+        {"name": "Bear", "price": 8.0, "probability": 0.20}
+      ],
+      "relative": {"ticker_metric": 0.55, "peer_median": 25.0, "target_metric": "Forward EPS × peer-median P/E"}
+    }
+  },
+  "RCAT": {
+    "ticker": "RCAT",
+    "name": "Red Cat Holdings",
+    "sector": "Defense / Drones",
+    "thesis": {
+      "short_term": "SRR program of record execution and NDAA tailwinds drive backlog conversion.",
+      "medium_term": "Teal 2/Black Widow platform becomes standard-issue US Army small UAS; international adoption adds optionality.",
+      "long_term": "Category bet on small-UAS becoming as standard as night-vision in infantry kit — category TAM expansion is the bull case."
+    },
+    "leading_indicators": [
+      {"name": "Backlog", "value": 85.0, "unit": "$M", "description": "Funded backlog"},
+      {"name": "Army SRR Delivery %", "value": 35.0, "unit": "%", "description": "Progress against SRR program of record units"},
+      {"name": "Gross Margin", "value": 18.0, "unit": "%", "description": "Consolidated gross margin"}
+    ],
+    "kill_switches": [
+      {"name": "SRR program cancellation", "metric": "SRR Program Active", "threshold": 0.5, "direction": "below", "current_value": 1.0},
+      {"name": "Backlog contraction", "metric": "Backlog $M", "threshold": 40.0, "direction": "below", "current_value": 85.0},
+      {"name": "Gross margin collapse", "metric": "GM %", "threshold": 10.0, "direction": "below", "current_value": 18.0}
+    ],
+    "bull_points": [
+      "Only US-made small UAS with Blue UAS certification at scale — regulatory moat vs DJI.",
+      "Army SRR win validates platform; Marines + allied nations represent incremental TAM.",
+      "Ukraine war normalized small-UAS as essential warfighter kit globally.",
+      "Defense-tech M&A premium if scaled to $500M+ revenue."
+    ],
+    "bear_points": [
+      "Small-cap; single-program risk if SRR schedule slips or is recompeted.",
+      "Gross margin still sub-20%, below defense-tech peer norms.",
+      "Cash burn with recurring equity raises dilutive.",
+      "Skydio + Anduril are well-funded competitors with deeper tech benches."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 5000000, "growth_high": 0.50, "growth_terminal": 0.03, "years_high": 7, "wacc": 0.14, "shares": 100000000},
+      "scenarios": [
+        {"name": "Bull", "price": 20.0, "probability": 0.25},
+        {"name": "Base", "price": 9.0, "probability": 0.45},
+        {"name": "Bear", "price": 2.5, "probability": 0.30}
+      ],
+      "relative": {"ticker_metric": 0.10, "peer_median": 80.0, "target_metric": "2027E EPS × peer-median P/E"}
+    }
+  },
+  "TSLA": {
+    "ticker": "TSLA",
+    "name": "Tesla Inc.",
+    "sector": "EV / AI",
+    "thesis": {
+      "short_term": "Delivery cadence and ASP mix are the short-term swing factors; Cybertruck ramp decelerating.",
+      "medium_term": "FSD v13+ unsupervised adoption and robotaxi pilot economics will determine whether auto-gross-margin narrative shifts from cyclical to software-multiple.",
+      "long_term": "Optimus + robotaxi: if either scales as Musk projects, current valuation is low. If neither does, the auto business alone does not justify today's multiple."
+    },
+    "leading_indicators": [
+      {"name": "Deliveries QoQ", "value": 3.0, "unit": "%", "description": "Quarterly unit deliveries growth"},
+      {"name": "Automotive Gross Margin (ex-credits)", "value": 17.0, "unit": "%", "description": "Core auto GM excluding regulatory credits"},
+      {"name": "FSD Take Rate", "value": 22.0, "unit": "%", "description": "Share of new vehicles with FSD purchase"}
+    ],
+    "kill_switches": [
+      {"name": "Auto gross margin collapse", "metric": "Auto GM ex-credits %", "threshold": 12.0, "direction": "below", "current_value": 17.0},
+      {"name": "Delivery contraction", "metric": "Deliveries QoQ %", "threshold": -10.0, "direction": "below", "current_value": 3.0},
+      {"name": "FSD take rate reversal", "metric": "FSD take rate %", "threshold": 10.0, "direction": "below", "current_value": 22.0}
+    ],
+    "bull_points": [
+      "FSD unsupervised reaching inflection — software-margin revenue stream unlocks.",
+      "Optimus TAM is large enough to subsume the valuation if BOM economics work.",
+      "Energy storage (Megapack) is a $10B+ growing franchise ignored by sell-side.",
+      "Vertical integration (cells, silicon, dojo) yields cost structure peers cannot match."
+    ],
+    "bear_points": [
+      "Core auto GM in mid-teens is commodity territory; BYD/Xiaomi price pressure durable.",
+      "Regulatory credit revenue fading faster than core GM expansion.",
+      "Key-person risk around Musk attention allocation (xAI, SpaceX, X, political).",
+      "Humanoid / robotaxi narratives frequently missed by meaningful timelines."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 5500000000, "growth_high": 0.20, "growth_terminal": 0.03, "years_high": 10, "wacc": 0.10, "shares": 3200000000},
+      "scenarios": [
+        {"name": "Bull", "price": 500.0, "probability": 0.25},
+        {"name": "Base", "price": 280.0, "probability": 0.45},
+        {"name": "Bear", "price": 140.0, "probability": 0.30}
+      ],
+      "relative": {"ticker_metric": 3.20, "peer_median": 28.0, "target_metric": "Forward EPS × peer-median P/E (auto)"}
+    }
+  },
+  "TSM": {
+    "ticker": "TSM",
+    "name": "Taiwan Semiconductor Manufacturing",
+    "sector": "AI Infrastructure",
+    "thesis": {
+      "short_term": "AI-driven leading-edge demand (N3/N2) keeps utilization and ASPs elevated through 2026.",
+      "medium_term": "Arizona/Japan/Germany fabs dilute margins near-term but derisk geopolitical concentration — CoWoS capacity is the binding constraint on AI accelerator TAM.",
+      "long_term": "Unassailable process leadership at the leading edge; only Intel foundry + Samsung can theoretically compete and both lag 2+ nodes."
+    },
+    "leading_indicators": [
+      {"name": "HPC Revenue Share", "value": 52.0, "unit": "%", "description": "HPC/AI segment share of revenue"},
+      {"name": "N3 Utilization", "value": 100.0, "unit": "%", "description": "N3 node utilization"},
+      {"name": "Gross Margin", "value": 59.0, "unit": "%", "description": "Consolidated gross margin"}
+    ],
+    "kill_switches": [
+      {"name": "Gross margin compression", "metric": "GM %", "threshold": 50.0, "direction": "below", "current_value": 59.0},
+      {"name": "HPC concentration reversal", "metric": "HPC share %", "threshold": 40.0, "direction": "below", "current_value": 52.0},
+      {"name": "N3 utilization collapse", "metric": "N3 Util %", "threshold": 80.0, "direction": "below", "current_value": 100.0}
+    ],
+    "bull_points": [
+      "Only company capable of manufacturing NVIDIA, AMD, Apple leading-edge silicon at scale.",
+      "CoWoS advanced packaging capacity is the binding supply constraint on AI hyperscale.",
+      "Arizona fab eases geopolitical discount over time.",
+      "Pricing power: ASP +10-15% per node transition with customer acceptance."
+    ],
+    "bear_points": [
+      "Taiwan Strait geopolitical risk is the permanent overhang; valuation discount justified.",
+      "Overseas fabs structurally margin-dilutive vs Taiwan base.",
+      "Hyperscaler custom silicon (Trainium, TPU) still funnels to TSMC, but Samsung/Intel competition could stir pricing.",
+      "Cycle risk: AI capex pause would crater HPC utilization quickly."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 40000000000, "growth_high": 0.15, "growth_terminal": 0.03, "years_high": 10, "wacc": 0.10, "shares": 5200000000},
+      "scenarios": [
+        {"name": "Bull", "price": 340.0, "probability": 0.30},
+        {"name": "Base", "price": 260.0, "probability": 0.55},
+        {"name": "Bear", "price": 150.0, "probability": 0.15}
+      ],
+      "relative": {"ticker_metric": 11.5, "peer_median": 22.0, "target_metric": "Forward EPS × peer-median P/E"}
+    }
+  },
+  "UUUU": {
+    "ticker": "UUUU",
+    "name": "Energy Fuels",
+    "sector": "Strategic Resources",
+    "thesis": {
+      "short_term": "Uranium spot price + contracted volumes with DOE drive near-term revenue line; White Mesa mill utilization climbing.",
+      "medium_term": "Rare earth / vanadium optionality at White Mesa diversifies vs pure-play uranium peers.",
+      "long_term": "Structural US uranium supply shortage amid SMR build-out + reactor restarts supports multi-year pricing environment."
+    },
+    "leading_indicators": [
+      {"name": "Uranium Spot Price", "value": 82.0, "unit": "$/lb U3O8", "description": "Spot U3O8 price"},
+      {"name": "White Mesa Utilization", "value": 45.0, "unit": "%", "description": "White Mesa mill throughput utilization"},
+      {"name": "Uranium Inventory", "value": 1.2, "unit": "M lb", "description": "Finished uranium inventory"}
+    ],
+    "kill_switches": [
+      {"name": "Uranium price crash", "metric": "U3O8 $/lb", "threshold": 55.0, "direction": "below", "current_value": 82.0},
+      {"name": "Mill utilization stall", "metric": "Mill Util %", "threshold": 20.0, "direction": "below", "current_value": 45.0},
+      {"name": "DOE contract loss", "metric": "DOE Contract Active", "threshold": 0.5, "direction": "below", "current_value": 1.0}
+    ],
+    "bull_points": [
+      "Only fully-permitted, conventional US uranium mill operator — domestic supply premium.",
+      "Rare earth (NdPr) monazite processing at White Mesa adds a second cash-flow stream.",
+      "SMR reactor restarts (Palisades, Three Mile) create multi-decade demand tailwind.",
+      "Strong balance sheet; no meaningful debt."
+    ],
+    "bear_points": [
+      "Uranium spot pricing remains volatile and Kazatomprom supply dominates.",
+      "Small-cap liquidity; sentiment-driven share-price swings.",
+      "Rare earth processing still early-stage and unproven at commercial scale.",
+      "Long production cycles mean revenue lags price signals meaningfully."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 20000000, "growth_high": 0.35, "growth_terminal": 0.03, "years_high": 7, "wacc": 0.12, "shares": 200000000},
+      "scenarios": [
+        {"name": "Bull", "price": 15.0, "probability": 0.30},
+        {"name": "Base", "price": 8.5, "probability": 0.45},
+        {"name": "Bear", "price": 4.0, "probability": 0.25}
+      ],
+      "relative": {"ticker_metric": 0.12, "peer_median": 55.0, "target_metric": "2027E EPS × peer-median P/E"}
+    }
+  },
+  "VOO": {
+    "ticker": "VOO",
+    "name": "Vanguard S&P 500 ETF",
+    "sector": "Broad Market",
+    "thesis": {
+      "short_term": "Fed rate path + earnings breadth are the near-term drivers; AI concentration keeps top-10 weights elevated.",
+      "medium_term": "Earnings growth vs multiple compression determines whether forward return matches historical 8-10%.",
+      "long_term": "Broad-market S&P 500 exposure remains the default vehicle for durable compounded nominal growth of US corporate earnings."
+    },
+    "leading_indicators": [
+      {"name": "S&P 500 Forward P/E", "value": 22.0, "unit": "", "description": "NTM P/E of index"},
+      {"name": "S&P 500 Earnings YoY", "value": 11.0, "unit": "%", "description": "Blended YoY EPS growth"},
+      {"name": "Top-10 Weight", "value": 36.0, "unit": "%", "description": "Concentration: top-10 constituents share"}
+    ],
+    "kill_switches": [
+      {"name": "Multiple compression", "metric": "Forward P/E", "threshold": 30.0, "direction": "above", "current_value": 22.0},
+      {"name": "Earnings contraction", "metric": "EPS YoY %", "threshold": -5.0, "direction": "below", "current_value": 11.0},
+      {"name": "Concentration risk", "metric": "Top-10 Weight %", "threshold": 45.0, "direction": "above", "current_value": 36.0}
+    ],
+    "bull_points": [
+      "Cheapest total-cost-of-ownership S&P 500 exposure in ETF form (0.03% ER).",
+      "Earnings breadth broadening beyond Mag-7 supports next-leg returns.",
+      "Passive flow reflexivity continues to bid mega-cap weights.",
+      "Dollar-cost-averaging vehicle for core portfolio construction."
+    ],
+    "bear_points": [
+      "Forward P/E elevated vs historical median; margin of safety low.",
+      "Concentration in AI-infra names creates hidden single-factor exposure.",
+      "Rising sovereign yields raise discount rate faster than earnings can absorb.",
+      "Passive-flow reflexivity works in reverse if outflows accelerate."
+    ],
+    "valuation_inputs": {
+      "dcf": {"fcf": 250.0, "growth_high": 0.08, "growth_terminal": 0.03, "years_high": 10, "wacc": 0.085, "shares": 1.0},
+      "scenarios": [
+        {"name": "Bull", "price": 650.0, "probability": 0.30},
+        {"name": "Base", "price": 550.0, "probability": 0.50},
+        {"name": "Bear", "price": 420.0, "probability": 0.20}
+      ],
+      "relative": {"ticker_metric": 26.0, "peer_median": 22.0, "target_metric": "Forward index EPS × historical median P/E"}
+    }
+  }
+}
