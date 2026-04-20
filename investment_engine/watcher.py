@@ -3,15 +3,26 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
+from investment_engine.analysis.performance import compute_performance_stats
 from investment_engine.analysis.red_blue_team import stress_test
 from investment_engine.data_sources.registry import load_ticker
-from investment_engine.data_sources.yfinance_source import get_current_price
-from investment_engine.models import TickerThesis, ValuationResult, WeeklyReport
+from investment_engine.data_sources.yfinance_source import (
+    get_current_price,
+    get_price_history,
+)
+from investment_engine.models import (
+    PerformanceStats,
+    TickerThesis,
+    ValuationResult,
+    WeeklyReport,
+)
 from investment_engine.valuation import (
     probabilistic_valuation,
     relative_valuation,
     two_stage_dcf,
 )
+
+BENCHMARK_TICKER = "VOO"
 
 
 class InvestmentWatcher:
@@ -29,11 +40,26 @@ class InvestmentWatcher:
             relative_target=relative_valuation(v.relative),
         )
 
+    def _fetch_performance(self, ticker: str) -> PerformanceStats | None:
+        try:
+            prices = get_price_history(ticker, period="3y")
+            bench = get_price_history(BENCHMARK_TICKER, period="3y")
+        except Exception:
+            return None
+        if prices is None or bench is None:
+            return None
+        try:
+            stats = compute_performance_stats(prices, bench)
+        except Exception:
+            return None
+        return stats if stats.periods else None
+
     def build_report(
         self,
         ticker: str,
         as_of: date | None = None,
         fetch_price: bool = True,
+        fetch_performance: bool = True,
     ) -> WeeklyReport:
         thesis = self.load(ticker)
         valuation = self.valuate(thesis)
@@ -47,6 +73,10 @@ class InvestmentWatcher:
                 price = get_current_price(ticker)
             except Exception:
                 price = None
+
+        performance: PerformanceStats | None = None
+        if fetch_performance:
+            performance = self._fetch_performance(ticker)
 
         return WeeklyReport(
             ticker=thesis.ticker,
@@ -64,4 +94,5 @@ class InvestmentWatcher:
             stress_test=stress_test(
                 thesis.bull_points, thesis.bear_points, thesis.kill_switches
             ),
+            performance=performance,
         )

@@ -7,10 +7,13 @@ REGISTRY = Path(__file__).resolve().parent.parent / "data" / "monitor-registry.j
 
 def test_end_to_end_build_report_without_price():
     watcher = InvestmentWatcher(REGISTRY)
-    report = watcher.build_report("NVDA", fetch_price=False)
+    report = watcher.build_report(
+        "NVDA", fetch_price=False, fetch_performance=False
+    )
 
     assert report.ticker == "NVDA"
     assert report.current_price is None
+    assert report.performance is None
     assert report.valuation.dcf_target > 0
     assert report.valuation.probabilistic_target > 0
     assert report.valuation.relative_target > 0
@@ -22,6 +25,20 @@ def test_end_to_end_build_report_without_price():
     assert len(report.stress_test.flags) >= 1
 
 
+def test_build_report_tolerates_performance_fetch_failure(monkeypatch):
+    def boom(ticker: str, period: str = "3y"):
+        raise RuntimeError("yfinance down")
+
+    monkeypatch.setattr(
+        "investment_engine.watcher.get_price_history", boom
+    )
+    watcher = InvestmentWatcher(REGISTRY)
+    report = watcher.build_report(
+        "NVDA", fetch_price=False, fetch_performance=True
+    )
+    assert report.performance is None
+
+
 def test_build_report_tolerates_price_fetch_failure(monkeypatch):
     def boom(_ticker):
         raise RuntimeError("network down")
@@ -30,5 +47,7 @@ def test_build_report_tolerates_price_fetch_failure(monkeypatch):
         "investment_engine.watcher.get_current_price", boom
     )
     watcher = InvestmentWatcher(REGISTRY)
-    report = watcher.build_report("NVDA", fetch_price=True)
+    report = watcher.build_report(
+        "NVDA", fetch_price=True, fetch_performance=False
+    )
     assert report.current_price is None

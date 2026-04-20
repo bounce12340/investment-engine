@@ -110,6 +110,21 @@ class ThesisStressTest(BaseModel):
         return self.bull_count / self.bear_count
 
 
+class PeriodPerformance(BaseModel):
+    period: str  # e.g. "1y", "3y"
+    annualized_return: float
+    annualized_volatility: float
+    sharpe: float
+    sortino: float
+    max_drawdown: float
+    alpha_vs_voo: float
+    beta_vs_voo: float
+
+
+class PerformanceStats(BaseModel):
+    periods: list[PeriodPerformance]
+
+
 class WeeklyReport(BaseModel):
     ticker: str
     name: str
@@ -124,3 +139,4 @@ class WeeklyReport(BaseModel):
     bull_points: list[str]
     bear_points: list[str]
     stress_test: ThesisStressTest
+    performance: PerformanceStats | None = None

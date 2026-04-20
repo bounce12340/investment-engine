@@ -37,10 +37,15 @@ def analyze(
     ticker: str = typer.Argument(..., help="Ticker symbol, e.g. NVDA"),
     registry: Path = typer.Option(DEFAULT_REGISTRY, "--registry", help="Path to monitor-registry.json"),
     no_price: bool = typer.Option(False, "--no-price", help="Skip fetching live price from yfinance"),
+    no_performance: bool = typer.Option(False, "--no-performance", help="Skip fetching 3y history for performance stats"),
 ) -> None:
     """Print a console summary of the ticker's triangulation and kill-switch status."""
     watcher = InvestmentWatcher(registry)
-    report = watcher.build_report(ticker.upper(), fetch_price=not no_price)
+    report = watcher.build_report(
+        ticker.upper(),
+        fetch_price=not no_price,
+        fetch_performance=not no_performance,
+    )
 
     header = f"[bold cyan]{report.ticker}[/bold cyan] — {report.name} ({report.year}-W{report.week:02d})"
     if report.current_price is not None:
@@ -76,6 +81,30 @@ def analyze(
     if fired:
         console.print(f"\n[bold red]⚠ {len(fired)} kill-switch(es) triggered.[/bold red]")
 
+    if report.performance and report.performance.periods:
+        console.print()
+        perf_table = Table(title="Historical Performance")
+        perf_table.add_column("Period")
+        perf_table.add_column("Return", justify="right")
+        perf_table.add_column("Vol", justify="right")
+        perf_table.add_column("Sharpe", justify="right")
+        perf_table.add_column("Sortino", justify="right")
+        perf_table.add_column("Max DD", justify="right")
+        perf_table.add_column("α vs VOO", justify="right")
+        perf_table.add_column("β", justify="right")
+        for p in report.performance.periods:
+            perf_table.add_row(
+                p.period,
+                f"{p.annualized_return*100:+.1f}%",
+                f"{p.annualized_volatility*100:.1f}%",
+                f"{p.sharpe:.2f}",
+                f"{p.sortino:.2f}",
+                f"{p.max_drawdown*100:.1f}%",
+                f"{p.alpha_vs_voo*100:+.1f}%",
+                f"{p.beta_vs_voo:.2f}",
+            )
+        console.print(perf_table)
+
     console.print()
     st = report.stress_test
     score_color = "green" if st.conviction_score >= 7 else "yellow" if st.conviction_score >= 4 else "red"
@@ -101,10 +130,15 @@ def weekly(
     registry: Path = typer.Option(DEFAULT_REGISTRY, "--registry", help="Path to monitor-registry.json"),
     vault: Path = typer.Option(Path(DEFAULT_VAULT), "--vault", help="Obsidian vault path"),
     no_price: bool = typer.Option(False, "--no-price", help="Skip fetching live price from yfinance"),
+    no_performance: bool = typer.Option(False, "--no-performance", help="Skip fetching 3y history for performance stats"),
 ) -> None:
     """Generate a weekly Markdown report and write it into the Obsidian vault."""
     watcher = InvestmentWatcher(registry)
-    report = watcher.build_report(ticker.upper(), fetch_price=not no_price)
+    report = watcher.build_report(
+        ticker.upper(),
+        fetch_price=not no_price,
+        fetch_performance=not no_performance,
+    )
     path = write_to_vault(report, vault)
     console.print(f"[green]✓[/green] Wrote weekly report: {path}")
 

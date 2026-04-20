@@ -52,6 +52,17 @@
 - {{ p }}
 {% endfor %}
 
+{% if report.performance -%}
+## 📈 Historical Performance
+
+| Period | Return | Vol | Sharpe | Sortino | Max DD | α vs VOO | β |
+|--------|-------:|----:|-------:|--------:|-------:|---------:|---:|
+{% for p in report.performance.periods -%}
+| {{ p.period }} | {{ "%+.1f"|format(p.annualized_return * 100) }}% | {{ "%.1f"|format(p.annualized_volatility * 100) }}% | {{ "%.2f"|format(p.sharpe) }} | {{ "%.2f"|format(p.sortino) }} | {{ "%.1f"|format(p.max_drawdown * 100) }}% | {{ "%+.1f"|format(p.alpha_vs_voo * 100) }}% | {{ "%.2f"|format(p.beta_vs_voo) }} |
+{% endfor %}
+_Risk-free rate assumed 4.0%; α is Jensen's alpha annualized._
+
+{% endif -%}
 ## 🎯 Thesis Stress Test
 
 **Conviction score: {{ "%.1f"|format(report.stress_test.conviction_score) }} / 10**

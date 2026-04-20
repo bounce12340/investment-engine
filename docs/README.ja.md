@@ -71,10 +71,15 @@ Flag（ℹ️ info / ⚠️ warning / 🔴 alert）：
 `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md` に出力されます。
 ISO 週番号を使用します。
 
-**6. リアルタイム株価。** `yfinance` 経由で Yahoo Finance から取得。
+**6. ヒストリカル・パフォーマンス。** 各ティッカーにつき 3 年分の日次終値を
+Yahoo Finance から取得し、1y / 3y 窓での **Sharpe、Sortino、最大ドローダウン、
+年率ボラティリティ、VOO 対比の Jensen α / β**（無リスク金利 = 4.0%）を算出します。
+レポートと `analyze` CLI に「Historical Performance」セクションを追加します。
+
+**7. リアルタイム株価。** `yfinance` 経由で Yahoo Finance から取得。
 オフライン時は優雅にフォールバックします。
 
-**7. スケジューリング。** macOS `launchd` による日次 / 週次 / 月次の
+**8. スケジューリング。** macOS `launchd` による日次 / 週次 / 月次の
 定期実行。対話プロンプトまたはフラグで設定可能。
 
 ---
@@ -112,12 +117,13 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 
 ### `analyze TICKER`
 コンソール要約を出力：三角化バリュエーション、kill-switch ステータス、
-テーゼ・ストレステスト。
+ヒストリカル・パフォーマンス、テーゼ・ストレステスト。
 
 | フラグ | デフォルト | 説明 |
 |--------|-----------|------|
 | `--registry PATH` | `data/monitor-registry.json` | カスタム registry ファイル |
 | `--no-price` | off | yfinance からの株価取得をスキップ |
+| `--no-performance` | off | 3 年ヒストリー取得（Sharpe / α / β）をスキップ |
 
 ### `weekly TICKER`
 Markdown レポートを生成し Obsidian ボルトに書き込みます。
@@ -127,6 +133,7 @@ Markdown レポートを生成し Obsidian ボルトに書き込みます。
 | `--registry PATH` | `data/monitor-registry.json` | カスタム registry ファイル |
 | `--vault PATH` | `$OBSIDIAN_VAULT` または `/Users/chunghsutsai/Vault` | 対象ボルト |
 | `--no-price` | off | yfinance からの株価取得をスキップ |
+| `--no-performance` | off | 3 年ヒストリー取得（Sharpe / α / β）をスキップ |
 
 出力先：`{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`
 
@@ -228,6 +235,14 @@ NVDA — NVIDIA Corporation (2026-W17)  |  price $202.06
 └───────────────┴──────────┘
 Upside vs current price: +253.8%
 
+               Historical Performance
+┏━━━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ Period ┃  Return ┃   Vol ┃ Sharpe ┃ Sortino ┃ Max DD ┃ α vs VOO ┃    β ┃
+┡━━━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 1y     │ +121.9% │ 33.7% │   3.50 │    5.71 │ -20.2% │   +52.9% │ 1.75 │
+│ 3y     │ +120.8% │ 48.8% │   2.39 │    3.72 │ -36.9% │   +76.2% │ 2.13 │
+└────────┴─────────┴───────┴────────┴─────────┴────────┴──────────┴──────┘
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -271,6 +286,7 @@ investment-engine/
 - 三角測量バリュエーション（DCF + Probabilistic + Relative）
 - 静的 kill-switch チェック
 - 決定論的 Red/Blue テーゼ・ストレステスト + Conviction score
+- ヒストリカル・パフォーマンス（Sharpe / Sortino / 最大 DD / VOO 対比 α-β）
 - Obsidian Markdown 出力
 - yfinance リアルタイム株価
 - macOS launchd スケジューリング

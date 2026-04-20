@@ -72,10 +72,15 @@ Flag (ℹ️ info / ⚠️ warning / 🔴 alert):
 `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md` 에 저장됩니다.
 ISO 주차 번호를 사용합니다.
 
-**6. 실시간 주가.** `yfinance` 를 통해 Yahoo Finance 에서 현재 가격을
+**6. 역사적 성과.** 각 티커에 대해 Yahoo Finance 에서 3년치 일일 종가를
+가져와, 1y / 3y 윈도우에서 **Sharpe, Sortino, 최대 낙폭, 연간 변동성,
+VOO 대비 Jensen α / β** (무위험 수익률 = 4.0%) 를 계산합니다.
+리포트와 `analyze` CLI 에 "Historical Performance" 섹션이 추가됩니다.
+
+**7. 실시간 주가.** `yfinance` 를 통해 Yahoo Finance 에서 현재 가격을
 가져오며, 오프라인 시에는 우아하게 폴백합니다.
 
-**7. 스케줄링.** macOS `launchd` 로 일간 / 주간 / 월간 반복 실행.
+**8. 스케줄링.** macOS `launchd` 로 일간 / 주간 / 월간 반복 실행.
 대화형 프롬프트 또는 플래그로 설정.
 
 ---
@@ -112,12 +117,13 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 ## CLI 레퍼런스
 
 ### `analyze TICKER`
-콘솔 요약 출력: 삼각 밸류에이션, kill-switch 상태, 테제 스트레스 테스트.
+콘솔 요약 출력: 삼각 밸류에이션, kill-switch 상태, 역사적 성과, 테제 스트레스 테스트.
 
 | 플래그 | 기본값 | 설명 |
 |--------|--------|------|
 | `--registry PATH` | `data/monitor-registry.json` | 사용자 정의 registry 파일 |
 | `--no-price` | off | yfinance 실시간 가격 조회 건너뛰기 |
+| `--no-performance` | off | 3년 히스토리 조회 (Sharpe / α / β) 건너뛰기 |
 
 ### `weekly TICKER`
 Markdown 리포트를 생성하여 Obsidian 볼트에 기록합니다.
@@ -127,6 +133,7 @@ Markdown 리포트를 생성하여 Obsidian 볼트에 기록합니다.
 | `--registry PATH` | `data/monitor-registry.json` | 사용자 정의 registry 파일 |
 | `--vault PATH` | `$OBSIDIAN_VAULT` 또는 `/Users/chunghsutsai/Vault` | 대상 볼트 |
 | `--no-price` | off | yfinance 실시간 가격 조회 건너뛰기 |
+| `--no-performance` | off | 3년 히스토리 조회 (Sharpe / α / β) 건너뛰기 |
 
 출력 경로: `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`.
 
@@ -229,6 +236,14 @@ NVDA — NVIDIA Corporation (2026-W17)  |  price $202.06
 └───────────────┴──────────┘
 Upside vs current price: +253.8%
 
+               Historical Performance
+┏━━━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ Period ┃  Return ┃   Vol ┃ Sharpe ┃ Sortino ┃ Max DD ┃ α vs VOO ┃    β ┃
+┡━━━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 1y     │ +121.9% │ 33.7% │   3.50 │    5.71 │ -20.2% │   +52.9% │ 1.75 │
+│ 3y     │ +120.8% │ 48.8% │   2.39 │    3.72 │ -36.9% │   +76.2% │ 2.13 │
+└────────┴─────────┴───────┴────────┴─────────┴────────┴──────────┴──────┘
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -272,6 +287,7 @@ investment-engine/
 - 삼각 측량 밸류에이션 (DCF + Probabilistic + Relative)
 - 정적 kill-switch 체크
 - 결정론적 Red/Blue 테제 스트레스 테스트 + Conviction score
+- 역사적 성과 (Sharpe / Sortino / 최대 낙폭 / VOO 대비 α-β)
 - Obsidian Markdown 출력
 - yfinance 실시간 주가
 - macOS launchd 스케줄링

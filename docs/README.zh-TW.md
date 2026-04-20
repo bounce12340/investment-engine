@@ -66,9 +66,14 @@ Flag（ℹ️ info / ⚠️ warning / 🔴 alert）：
 `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`，直接進你的知識庫。
 採 ISO 週數編號。
 
-**6. 即時股價。** 透過 `yfinance` 抓 Yahoo Finance 當前價格，離線時會 fallback。
+**6. 歷史績效。** 對每個 ticker 抓 3 年日線收盤，計算 1y / 3y 的
+**Sharpe、Sortino、最大回撤、年化波動率、對 VOO 的 Jensen α / β**
+（risk-free rate = 4.0%）。報告和 `analyze` CLI 都會多一個
+「Historical Performance」區塊。
 
-**7. 排程。** macOS `launchd` 支援日 / 週 / 月循環執行，可互動選項或用 flag。
+**7. 即時股價。** 透過 `yfinance` 抓 Yahoo Finance 當前價格，離線時會 fallback。
+
+**8. 排程。** macOS `launchd` 支援日 / 週 / 月循環執行，可互動選項或用 flag。
 
 ---
 
@@ -104,12 +109,13 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 ## CLI 指令參考
 
 ### `analyze TICKER`
-輸出 console 摘要：三角估值、kill-switch 狀態、論點壓力測試。
+輸出 console 摘要：三角估值、kill-switch 狀態、歷史績效、論點壓力測試。
 
 | 參數 | 預設 | 說明 |
 |------|------|------|
 | `--registry PATH` | `data/monitor-registry.json` | 自訂 registry 檔 |
 | `--no-price` | off | 跳過 yfinance 即時股價抓取 |
+| `--no-performance` | off | 跳過 3 年歷史抓取（Sharpe / α / β） |
 
 ### `weekly TICKER`
 產生 Markdown 週報並寫進 Obsidian vault。
@@ -119,6 +125,7 @@ investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 | `--registry PATH` | `data/monitor-registry.json` | 自訂 registry 檔 |
 | `--vault PATH` | `$OBSIDIAN_VAULT` 或 `/Users/chunghsutsai/Vault` | Vault 路徑 |
 | `--no-price` | off | 跳過 yfinance 即時股價抓取 |
+| `--no-performance` | off | 跳過 3 年歷史抓取（Sharpe / α / β） |
 
 輸出路徑：`{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`。
 
@@ -219,6 +226,14 @@ NVDA — NVIDIA Corporation (2026-W17)  |  price $202.06
 └───────────────┴──────────┘
 Upside vs current price: +253.8%
 
+               Historical Performance
+┏━━━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ Period ┃  Return ┃   Vol ┃ Sharpe ┃ Sortino ┃ Max DD ┃ α vs VOO ┃    β ┃
+┡━━━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 1y     │ +121.9% │ 33.7% │   3.50 │    5.71 │ -20.2% │   +52.9% │ 1.75 │
+│ 3y     │ +120.8% │ 48.8% │   2.39 │    3.72 │ -36.9% │   +76.2% │ 2.13 │
+└────────┴─────────┴───────┴────────┴─────────┴────────┴──────────┴──────┘
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -261,6 +276,7 @@ investment-engine/
 - 三角估值（DCF + Probabilistic + Relative）
 - 靜態 kill-switch 檢查
 - 確定性 Red/Blue 論點壓力測試 + 信心評分
+- 歷史績效（Sharpe / Sortino / 最大回撤 / 對 VOO 的 α-β）
 - Obsidian Markdown 輸出
 - 即時股價（yfinance）
 - macOS launchd 排程

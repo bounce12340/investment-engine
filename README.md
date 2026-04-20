@@ -73,10 +73,16 @@ Flags (ℹ️ info / ⚠️ warning / 🔴 alert):
 `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`, suitable for your knowledge
 base. ISO week numbering.
 
-**6. Live prices.** Current price fetched from Yahoo Finance via `yfinance`,
+**6. Historical performance.** For every ticker, the engine pulls 3 years of
+daily closes from Yahoo Finance and computes **Sharpe, Sortino, max drawdown,
+annualized volatility, and Jensen's α / β vs VOO** over 1y and 3y windows
+(risk-free rate = 4.0%). Adds a `## Historical Performance` section to every
+report and a Rich table in `analyze`.
+
+**7. Live prices.** Current price fetched from Yahoo Finance via `yfinance`,
 with graceful fallback when offline.
 
-**7. Scheduling.** Daily / weekly / monthly recurring runs via macOS
+**8. Scheduling.** Daily / weekly / monthly recurring runs via macOS
 `launchd`. Interactive prompts or flags.
 
 ---
@@ -113,13 +119,14 @@ Works offline with `--no-price` (skips the yfinance call).
 ## CLI reference
 
 ### `analyze TICKER`
-Prints a console summary: triangulated valuation, kill-switch status, and
-thesis stress test.
+Prints a console summary: triangulated valuation, kill-switch status,
+historical performance, and thesis stress test.
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--registry PATH` | `data/monitor-registry.json` | Custom registry file |
 | `--no-price` | off | Skip fetching live price from yfinance |
+| `--no-performance` | off | Skip fetching 3y history for Sharpe/α/β stats |
 
 ### `weekly TICKER`
 Generates a Markdown report and writes it into the Obsidian vault.
@@ -129,6 +136,7 @@ Generates a Markdown report and writes it into the Obsidian vault.
 | `--registry PATH` | `data/monitor-registry.json` | Custom registry file |
 | `--vault PATH` | `$OBSIDIAN_VAULT` or `/Users/chunghsutsai/Vault` | Target vault |
 | `--no-price` | off | Skip fetching live price from yfinance |
+| `--no-performance` | off | Skip fetching 3y history for Sharpe/α/β stats |
 
 Output path: `{vault}/Weekly_Reports/{TICKER}_{YYYY}-W{WW}.md`.
 
@@ -230,6 +238,14 @@ NVDA — NVIDIA Corporation (2026-W17)  |  price $202.06
 └───────────────┴──────────┘
 Upside vs current price: +253.8%
 
+               Historical Performance
+┏━━━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ Period ┃  Return ┃   Vol ┃ Sharpe ┃ Sortino ┃ Max DD ┃ α vs VOO ┃    β ┃
+┡━━━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 1y     │ +121.9% │ 33.7% │   3.50 │    5.71 │ -20.2% │   +52.9% │ 1.75 │
+│ 3y     │ +120.8% │ 48.8% │   2.39 │    3.72 │ -36.9% │   +76.2% │ 2.13 │
+└────────┴─────────┴───────┴────────┴─────────┴────────┴──────────┴──────┘
+
           Thesis Stress Test
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Metric                  ┃     Value ┃
@@ -273,6 +289,7 @@ investment-engine/
 - Triangulation valuation (DCF + Probabilistic + Relative)
 - Static kill-switch checks
 - Deterministic Red/Blue thesis stress test with conviction score
+- Historical performance (Sharpe / Sortino / max drawdown / α-β vs VOO)
 - Obsidian Markdown output
 - Live prices via yfinance
 - macOS launchd scheduling
