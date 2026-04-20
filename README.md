@@ -41,6 +41,38 @@ investment-engine analyze NVDA
 investment-engine weekly NVDA --vault /Users/chunghsutsai/Vault
 ```
 
+## Scheduling (macOS only)
+
+Recurring runs via `launchd`. Interactive by default — run `investment-engine schedule create` and you'll be prompted for frequency, time, and tickers.
+
+```bash
+# Interactive
+investment-engine schedule create
+
+# Flag-driven (daily at 09:00 for all tickers in registry)
+investment-engine schedule create --name morning --frequency daily --time 09:00 --yes
+
+# Weekly Mondays at 08:30 for a subset
+investment-engine schedule create --name mon-brief --frequency weekly \
+    --time 08:30 --weekday 1 --tickers NVDA,TSM,GOOGL --yes
+
+# Monthly on the 1st at 07:00
+investment-engine schedule create --name month-end --frequency monthly \
+    --time 07:00 --day 1 --yes
+
+# Manage
+investment-engine schedule list
+investment-engine schedule show morning
+investment-engine schedule remove morning
+```
+
+Each schedule generates:
+- A wrapper script at `~/Library/Application Support/investment-engine/<name>.sh`
+- A launchd plist at `~/Library/LaunchAgents/com.investment-engine.<name>.plist`
+- A log at `~/Library/Logs/investment-engine-<name>.log`
+
+Weekday numbering: `0=Sun, 1=Mon, ..., 6=Sat` (launchd convention).
+
 ## Registry format
 
 See `data/monitor-registry.json` for the NVDA sample. Fields:
