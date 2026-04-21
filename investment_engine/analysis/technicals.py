@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 from investment_engine.models import TechnicalSnapshot
@@ -16,8 +17,15 @@ def _rsi(prices: "pd.Series", window: int = 14) -> "pd.Series":
     losses = -delta.clip(upper=0.0)
     avg_gain = gains.ewm(alpha=1.0 / window, adjust=False, min_periods=window).mean()
     avg_loss = losses.ewm(alpha=1.0 / window, adjust=False, min_periods=window).mean()
+    # Flat or monotone series produce zero avg_loss / avg_gain; map those to
+    # the canonical RSI limits (100 for pure gains, 0 for pure losses, 50 for
+    # a perfectly flat series) instead of propagating NaN.
     rs = avg_gain / avg_loss
-    return 100 - 100 / (1 + rs)
+    rsi = 100 - 100 / (1 + rs)
+    rsi = rsi.mask((avg_gain == 0) & (avg_loss == 0), 50.0)
+    rsi = rsi.mask((avg_loss == 0) & (avg_gain > 0), 100.0)
+    rsi = rsi.mask((avg_gain == 0) & (avg_loss > 0), 0.0)
+    return rsi
 
 
 def _macd(
@@ -49,14 +57,25 @@ def compute_technical_snapshot(prices: "pd.Series") -> TechnicalSnapshot:
     ma_50_val = float(ma_50.iloc[-1])
     ma_200_val = float(ma_200.iloc[-1])
 
+    rsi_val = float(rsi.iloc[-1])
+    if math.isnan(rsi_val):
+        rsi_val = 50.0
+
     return TechnicalSnapshot(
         price=latest_price,
-        rsi_14=float(rsi.iloc[-1]),
+        rsi_14=rsi_val,
         macd=float(macd_line.iloc[-1]),
         macd_signal=float(signal_line.iloc[-1]),
         macd_histogram=float(histogram.iloc[-1]),
         ma_50=ma_50_val,
         ma_200=ma_200_val,
-        distance_from_ma50_pct=(latest_price - ma_50_val) / ma_50_val * 100,
-        distance_from_ma200_pct=(latest_price - ma_200_val) / ma_200_val * 100,
+        distance_from_ma50_pct=_pct_from(latest_price, ma_50_val),
+        distance_from_ma200_pct=_pct_from(latest_price, ma_200_val),
     )
+
+
+def _pct_from(price: float, ma: float) -> float:
+    """Percent distance from a moving average, safe against zero/NaN MAs."""
+    if ma == 0 or math.isnan(ma):
+        return 0.0
+    return (price - ma) / ma * 100
