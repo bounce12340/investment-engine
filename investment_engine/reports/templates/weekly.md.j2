@@ -28,7 +28,7 @@
 | Relative Multiples | ${{ "%.2f"|format(report.valuation.relative_target) }} |
 | **Triangulated (avg)** | **${{ "%.2f"|format(report.valuation.triangulated) }}** |
 
-{% if report.current_price is not none %}
+{% if report.current_price is not none and report.current_price > 0 %}
 **Upside vs current:** {{ "%+.1f"|format((report.valuation.triangulated / report.current_price - 1) * 100) }}%
 {% endif %}
 

@@ -27,7 +27,10 @@ app.add_typer(schedule_app, name="schedule")
 console = Console()
 
 DEFAULT_REGISTRY = Path(__file__).resolve().parent.parent / "data" / "monitor-registry.json"
-DEFAULT_VAULT = os.environ.get("OBSIDIAN_VAULT", "/Users/chunghsutsai/Vault")
+# Default vault location: prefer OBSIDIAN_VAULT env var, otherwise fall back to
+# ~/Vault so the CLI works cross-platform instead of pointing at a hardcoded
+# developer-specific path.
+DEFAULT_VAULT = os.environ.get("OBSIDIAN_VAULT", str(Path.home() / "Vault"))
 
 WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -66,7 +69,7 @@ def analyze(
     val_table.add_row("[bold]Triangulated[/bold]", f"[bold]${report.valuation.triangulated:.2f}[/bold]")
     console.print(val_table)
 
-    if report.current_price is not None:
+    if report.current_price is not None and report.current_price > 0:
         upside = (report.valuation.triangulated / report.current_price - 1) * 100
         console.print(f"Upside vs current price: [bold]{upside:+.1f}%[/bold]")
 

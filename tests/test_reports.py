@@ -53,6 +53,15 @@ def test_render_weekly_contains_key_sections():
     assert "Conviction score" in md
 
 
+def test_render_weekly_handles_zero_current_price():
+    # current_price=0 previously tripped ZeroDivisionError in the "Upside vs
+    # current" line because `is not none` didn't guard against 0.0.
+    report = _sample_report()
+    report.current_price = 0.0
+    md = render_weekly(report)
+    assert "Upside vs current" not in md
+
+
 def test_write_to_vault_creates_file(tmp_path: Path):
     report = _sample_report()
     path = write_to_vault(report, tmp_path)

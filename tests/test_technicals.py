@@ -38,8 +38,8 @@ def test_monotonic_downtrend_rsi_near_0_and_below_mas():
 
 
 def test_flat_prices_rsi_is_nan_safe():
-    # Flat series: zero gains and zero losses → RSI is NaN-ish.
-    # The snapshot should still produce finite MA values and zero MACD.
+    # Flat series: zero gains and zero losses → RSI degenerates, but the
+    # snapshot must still produce finite, displayable numbers.
     prices = _series([100.0] * (MIN_HISTORY + 20))
     snap = compute_technical_snapshot(prices)
     assert snap.ma_50 == pytest.approx(100.0)
@@ -47,6 +47,19 @@ def test_flat_prices_rsi_is_nan_safe():
     assert snap.distance_from_ma50_pct == pytest.approx(0.0)
     assert snap.distance_from_ma200_pct == pytest.approx(0.0)
     assert snap.macd == pytest.approx(0.0, abs=1e-9)
+    # RSI must be a finite number (50.0 is the canonical neutral value), not NaN.
+    assert snap.rsi_14 == pytest.approx(50.0)
+
+
+def test_zero_prices_do_not_divide_by_zero():
+    # Pathological input: all-zero prices would make the MAs zero and the
+    # old distance-from-MA calculation raise ZeroDivisionError.
+    prices = _series([0.0] * (MIN_HISTORY + 20))
+    snap = compute_technical_snapshot(prices)
+    assert snap.ma_50 == pytest.approx(0.0)
+    assert snap.ma_200 == pytest.approx(0.0)
+    assert snap.distance_from_ma50_pct == pytest.approx(0.0)
+    assert snap.distance_from_ma200_pct == pytest.approx(0.0)
 
 
 def test_ma50_and_ma200_are_actually_the_means():

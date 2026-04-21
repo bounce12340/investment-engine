@@ -16,10 +16,11 @@ dependencies = [
     "rich>=13.7.0",
     "python-dotenv>=1.0.0",
     "jinja2>=3.1.0",
+    "pandas>=2.0.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0", "pytest-mock>=3.12.0"]
+dev = ["pytest>=8.0.0", "pytest-mock>=3.12.0", "numpy>=1.24.0"]
 
 [project.scripts]
 investment-engine = "investment_engine.cli:app"
